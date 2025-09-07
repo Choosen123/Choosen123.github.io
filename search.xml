@@ -2,7 +2,7 @@
 <search>
   <entry>
     <title>heap-and-stack</title>
-    <url>/Choosen123.github.io/2025/09/07/heap-and-stack/</url>
+    <url>/2025/09/07/heap-and-stack/</url>
     <content><![CDATA[freertos堆栈
 
 注意堆栈空间分配方向相反，若两区域相互覆盖会出现无法预料的问题。
