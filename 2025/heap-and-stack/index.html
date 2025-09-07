@@ -159,10 +159,10 @@
       </div>
       <div class="markdown-body">
         <h1>freertos堆栈</h1>
-<p><img src="/2025/09/07/heap-and-stack/heap-and-stack.png" alt="heap stack" loading="lazy"><br>
+<p><img src="/2025/heap-and-stack/heap-and-stack.png" alt="heap stack" loading="lazy"><br>
 注意堆栈空间分配方向相反，若两区域相互覆盖会出现无法预料的问题。</p>
 <h2 id="任务如何分配空间">任务如何分配空间</h2>
-<p><img src="/2025/09/07/heap-and-stack/task.png" alt="任务如何分配空间" loading="lazy"><br>
+<p><img src="/2025/heap-and-stack/task.png" alt="任务如何分配空间" loading="lazy"><br>
 当调用创建任务api函数xTaskCreate()时，freertos会在堆中开辟出一片空间，用于存放任务控制信息TCB块和用于存储任务相关变量的栈区Stack。</p>
 <p>使用xTaskCreateStatic()在静态区创建任务</p>
 <h3 id="TCB的大小构成">TCB的大小构成</h3>
@@ -212,7 +212,7 @@
 <li>用于每个任务独立的栈指针</li>
 <li>每个FreeRTOS任务都有自己的PSP堆栈</li>
 </ul>
-<p><img src="/2025/09/07/heap-and-stack/msp-psp.png" alt="MSP PSP" loading="lazy"></p>
+<p><img src="/2025/heap-and-stack/msp-psp.png" alt="MSP PSP" loading="lazy"></p>
 <p>示例：</p>
 <ol>
 <li>
@@ -243,27 +243,27 @@
 确定性的，不会导致内存碎片化,执行时间固定。<br>
 使用静态数组作为堆内存。数组大小由FreeRTOSConfig.h文件中ConfigTOTAL_HEAP_SIZE定义。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">xTaskCreate(myTask, <span class="string">&quot;Task1&quot;</span>, <span class="number">100</span>, <span class="literal">NULL</span>, <span class="number">1</span>, <span class="literal">NULL</span>);</span><br><span class="line">xQueueCreate(<span class="number">10</span>, <span class="keyword">sizeof</span>(<span class="type">uint32_t</span>));</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/09/07/heap-and-stack/heap1.png" alt="heap1" loading="lazy"></p>
+<p><img src="/2025/heap-and-stack/heap1.png" alt="heap1" loading="lazy"></p>
 <h3 id="heap-2-不推荐使用？">heap_2(不推荐使用？)</h3>
 <p>内存管理也由一个数组实现，大小由FreeRTOSConfig.h文件中configTOTAL_HEAP_SIZE定义<br>
 使用best fit算法对内存进行动态分配，允许释放内存。对大的内存块进行分割，但无法合并相连的内存块，容易导致内存的碎片化。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> *buffer = pvPortMalloc(<span class="number">50</span>);  <span class="comment">// 分配50字节</span></span><br><span class="line"><span class="comment">// 使用内存...</span></span><br><span class="line">vPortFree(buffer);  <span class="comment">// 释放内存</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2025/09/07/heap-and-stack/heap2.png" alt="heap_2" loading="lazy"></p>
+<p><img src="/2025/heap-and-stack/heap2.png" alt="heap_2" loading="lazy"></p>
 <h3 id="heap-3">heap_3</h3>
 <p>使用标准C库的malloc() free()函数<br>
 添加了互斥锁使其线程安全，调用malloc函数和free函数的时候会临时挂起FreeRTOS的调度器。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 和标准C库函数名相同，但内部添加了互斥保护</span></span><br><span class="line"><span class="type">void</span> *data = <span class="built_in">malloc</span>(<span class="number">100</span>);</span><br><span class="line"><span class="built_in">free</span>(data);</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/09/07/heap-and-stack/heap3.png" alt="heap_3" loading="lazy"></p>
+<p><img src="/2025/heap-and-stack/heap3.png" alt="heap_3" loading="lazy"></p>
 <h3 id="heap-4">heap_4</h3>
 <p>内存可以自由分配和合并空闲的内存块，并使得整体的性能最优。<br>
 使用&quot;首次匹配&quot;算法（使用第一个足够大的空闲块）<br>
 Heap_4的分配方案所需要时间是不确定性的，但速度要比malloc和free函数快。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 频繁分配释放也不会导致严重的内存碎片</span></span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">1000</span>; i++) &#123;</span><br><span class="line">    <span class="type">void</span> *temp = pvPortMalloc(random_size());</span><br><span class="line">    <span class="comment">// 使用内存...</span></span><br><span class="line">    vPortFree(temp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/09/07/heap-and-stack/heap4.jpg" alt="heap_4" loading="lazy"></p>
+<p><img src="/2025/heap-and-stack/heap4.jpg" alt="heap_4" loading="lazy"></p>
 <h3 id="heap-5">heap_5</h3>
 <p>类似于Heap_4的内存分配技术，但不同于Heap_4只用一个连续的数组表示堆，Heap_5可以用不同的数组空间对内存进行分配。要使用vPortDefineHeapRegions这个函数对不同的数组进行申明。</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化多区域内存</span></span><br><span class="line"><span class="comment">// 添加内部SRAM区域</span></span><br><span class="line">HeapRegion_t xHeapRegions[] = &#123;</span><br><span class="line">    &#123; (<span class="type">uint8_t</span>*)<span class="number">0x20000000</span>, <span class="number">0x10000</span> &#125;,  <span class="comment">// 内部SRAM: 64KB</span></span><br><span class="line">    &#123; (<span class="type">uint8_t</span>*)<span class="number">0x60000000</span>, <span class="number">0x80000</span> &#125;,  <span class="comment">// 外部SRAM: 512KB</span></span><br><span class="line">    &#123; <span class="literal">NULL</span>, <span class="number">0</span> &#125;  <span class="comment">// 终止标记</span></span><br><span class="line">&#125;;</span><br><span class="line">vPortDefineHeapRegions(xHeapRegions);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 之后正常使用</span></span><br><span class="line"><span class="type">void</span> *buffer = pvPortMalloc(<span class="number">1000</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p><img src="/2025/09/07/heap-and-stack/heap5.png" alt="heap5" loading="lazy"></p>
+<p><img src="/2025/heap-and-stack/heap5.png" alt="heap5" loading="lazy"></p>
 <h2 id="内存管理相关函数">内存管理相关函数</h2>
 <p><code>size_t xPortGetFreeHeapSize( void );</code><br>
 这个函数会返回当前堆中的空闲空间大小（单位是字节），可以用来优化堆空间大小。比如在系统运行起来后调用xPortGetFreeHeapSize如果返回了3000字节，就可以把堆大小configTOTAL_HEAP_SIZE设置为3000字节多一点。</p>
@@ -587,12 +587,12 @@ Heap_4的分配方案所需要时间是不确定性的，但速度要比malloc�
       </a>
       <div class="share-content hidden">
         
-          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + heap-and-stack + '&url=' + http%3A%2F%2Fchoosen123.github.io%2F2025%2F09%2F07%2Fheap-and-stack%2F + '" target="_blank" title="Twitter">
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + heap-and-stack + '&url=' + https%3A%2F%2Fchoosen123.github.io%2F2025%2Fheap-and-stack%2F + '" target="_blank" title="Twitter">
             <i class="iconfont icon-twitter"></i>
           </a>
         
         
-          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://choosen123.github.io/2025/09/07/heap-and-stack/" target="_blank" title="Facebook">
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://choosen123.github.io/2025/heap-and-stack/" target="_blank" title="Facebook">
             <i class="iconfont icon-facebooksquare"></i>
           </a>
         
