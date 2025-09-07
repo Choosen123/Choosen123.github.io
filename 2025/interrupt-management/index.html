@@ -13,7 +13,7 @@
   
   <title>
     
-      heap-and-stack 
+      interrupt-management 
       
       
       |
@@ -149,11 +149,11 @@
   <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
   <div class="container post-details" id="post-details">
     <div class="post-content">
-      <div class="post-title">heap-and-stack</div>
+      <div class="post-title">interrupt-management</div>
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2025-09-07 19:41:33
+          2025-09-07 19:40:59
         </span>
         
               <span class="post-tags">
@@ -169,130 +169,64 @@
           
       </div>
       <div class="markdown-body">
-        <h1>freertos堆栈</h1>
-<p><img src="/2025/heap-and-stack/heap-and-stack.png" alt="heap stack" loading="lazy"><br>
-注意堆栈空间分配方向相反，若两区域相互覆盖会出现无法预料的问题。</p>
-<h2 id="任务如何分配空间">任务如何分配空间</h2>
-<p><img src="/2025/heap-and-stack/task.png" alt="任务如何分配空间" loading="lazy"><br>
-当调用创建任务api函数xTaskCreate()时，freertos会在堆中开辟出一片空间，用于存放任务控制信息TCB块和用于存储任务相关变量的栈区Stack。</p>
-<p>使用xTaskCreateStatic()在静态区创建任务</p>
-<h3 id="TCB的大小构成">TCB的大小构成</h3>
-<p>TCB信息包括：任务当前执行到哪里了（程序计数器、堆栈指针）、任务的状态（运行、就绪、阻塞、挂起）、任务的优先级、任务的名字、任务等待的事件（比如信号量、队列、通知）等等。</p>
-<p>TCB的大小构成取决于FreeRTOSConfig.h头文件的设置，启用了哪些功能</p>
+        <h2 id="中断注意事项">中断注意事项</h2>
+<p>在FreeRTOS中，任务程序由内核调度器统一调度和执行，程序的运行情况在一定程度上是稳定可预测的；中断相对而言是由外部环境决定是不可预测的，会对系统引入不确定性，如果使用不当的话会导致系统的失效和不稳定。<br>
+对中断的使用要根据实际需求和使用场景来决定，通过合理的配置和与FreeRTOS的中断管理（Interrupt Management）配合可以达到系统的高效能和高稳定性。</p>
+<h2 id="FreeRTOS中断管理">FreeRTOS中断管理</h2>
+<p>在FreeRTOS中中断的优先级和任务的优先级是有区别的,中断拥有更高的权限。</p>
 <ul>
-<li>最小设置下96字节</li>
-<li>configUSE_TASK_NOTIFICATIONS是1，增加8字节</li>
-<li>configUSE_TRACE_FACILITY是1，增加8字节</li>
-<li>configUSE_MUTEXES是1,增加8字节</li>
+<li>任务的优先级是由用户设置内核管理器管理的软件特性（software feature），与操作系统所在的硬件平台无关。</li>
+<li>中断的优先级是由硬件平台相关的硬件特性（hardware feature），在中断代码运行的时候任务的代码将无法运行。即使是拥有最小优先级的中断也会打断拥有最高优先级的任务。<br>
+FreeRTOS对于一些系统API函数提供两种版本，一种是供任务调用的，一种是供中断调用的（Interrupt Safe API）。由中断调用的API函数后缀上会有“FromISR”。</li>
 </ul>
-<table>
-<thead>
-<tr>
-<th>参数</th>
-<th>含义</th>
-<th>目的</th>
-</tr>
-</thead>
-<tbody>
-<tr>
-<td>configUSE_TASK_NOTIFICATIONS</td>
-<td>启用任务通知</td>
-<td>轻量级任务间通信/同步,一个任务可以给另一个任务“发通知”（设置通知值/状态），另一个任务可以“等待通知”（阻塞直到收到通知</td>
-</tr>
-<tr>
-<td>configUSE_TRACE_FACILITY</td>
-<td>启用跟踪调试设施</td>
-<td>系统调试分析（任务状态、事件）</td>
-</tr>
-<tr>
-<td>configUSE_MUTEXES</td>
-<td>启用互斥锁</td>
-<td>启用互斥锁</td>
-</tr>
-</tbody>
-</table>
-<h2 id="MSP和PSP栈指针">MSP和PSP栈指针</h2>
-<p>MSP主堆栈指针(Main stack pointer):</p>
+<p>当在普通任务中调用FreeRTOS的API函数（如xQueueSend()、xSemaphoreGive()等）时：如果configUSE_PREEMPTION设置为1（抢占式调度）,并且调用API后有更高优先级的任务变为就绪状态,调度器会自动立即切换到那个更高优先级的任务。</p>
+<p>当在中断处理时调用特殊的&quot;FromISR&quot;版本的API（如xQueueSendFromISR()、xSemaphoreGiveFromISR()等），如果有更高级别的任务进入就绪态，系统不会在中断处理函数结束后自动切换任务。而是需要手动根据&quot;FromISR&quot;版本函数的一个自带参数<code>pxHigherPriorityTaskWoken</code>参数的值，调用<code>portTIELD_FROM_ISR(pxHigherPriorityTaskWoken)</code>来手动决定是否切换任务。</p>
 <ul>
-<li>系统启动时默认使用的堆栈指针</li>
-<li>用于处理中断和异常</li>
-<li>操作系统内核(如FreeRTOS内核)使用</li>
+<li>如果API的调用导致更高级别任务进入就绪态，<code>pxHigherPriorityTaskWoken</code>参数会被设为<code>pdTRUE</code></li>
 </ul>
-<p>PSP进程堆栈指针(Process stack pointer)</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 中断处理函数</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">vUARTInterruptHandler</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">    BaseType_t xHigherPriorityTaskWoken = pdFALSE;</span><br><span class="line">    <span class="type">char</span> receivedChar;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 假设收到一个字符</span></span><br><span class="line">    receivedChar = UART_READ_REGISTER;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 将字符发送到队列，可能会唤醒等待队列的高优先级任务</span></span><br><span class="line">    xQueueSendFromISR(xCharQueue, &amp;receivedChar, &amp;xHigherPriorityTaskWoken);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">// 中断结束前，检查是否需要任务切换</span></span><br><span class="line">    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="延迟中断处理">延迟中断处理</h2>
+<p>延迟中断处理是一种设计模式：</p>
 <ul>
-<li>用于每个任务独立的栈指针</li>
-<li>每个FreeRTOS任务都有自己的PSP堆栈</li>
+<li>最小化的中断服务程序(ISR)：只做必要的紧急处理</li>
+<li>专门的高优先级任务：处理剩余的中断相关工作</li>
 </ul>
-<p><img src="/2025/heap-and-stack/msp-psp.png" alt="MSP PSP" loading="lazy"></p>
-<p>示例：</p>
+<p>优点：</p>
+<ul>
+<li>缩短中断响应时间：ISR应尽可能短，减少中断禁用时间</li>
+<li>提高系统响应性：复杂处理放在任务中，不阻塞其他中断</li>
+<li>简化代码：在任务中可以使用所有FreeRTOS API，而不仅限于FromISR版本</li>
+<li>优先级控制：通过任务优先级控制中断处理的优先顺序</li>
+<li>便于调试：任务比ISR更容易调试</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 中断服务程序 - 硬件直接调用</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">InterruptHandling</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">   RecordInterrupt();     <span class="comment">// 记录中断信息（可能存储到全局变量或队列）</span></span><br><span class="line">   ClearInterruptFlag();  <span class="comment">// 清除中断标志，允许新的中断发生</span></span><br><span class="line">   portYIELD_FROM_ISR(pdTRUE); <span class="comment">// 强制任务切换，让高优先级任务立即执行</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// 中断处理任务 - 由调度器调度</span></span><br><span class="line"><span class="type">void</span> <span class="title function_">vInterruptHandling</span><span class="params">(<span class="type">void</span> <span class="type">const</span> * argument)</span></span><br><span class="line">&#123;</span><br><span class="line">   <span class="comment">// 无限循环，等待中断发生</span></span><br><span class="line">   <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">       ProcessInterrupt(); <span class="comment">// 处理之前记录的中断信息</span></span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>工作流程：</p>
 <ol>
-<li>
-<p>系统启动：使用MSP初始化所有硬件和FreeRTOS</p>
-</li>
-<li>
-<p>任务切换：</p>
-<ul>
-<li>LED任务使用自己的PSP，包含其局部变量ledState</li>
-<li>温度任务使用自己的PSP，包含局部变量temperature和数组samples</li>
-<li>任务切换时，FreeRTOS保存当前PSP和恢复下一个任务的PSP</li>
-</ul>
-</li>
-<li>
-<p>中断处理：</p>
-<ul>
-<li>当按键中断发生时，无论哪个任务在运行，处理器立即切换到MSP</li>
-<li>中断处理完毕后，返回到被中断的任务（使用其PSP）或切换到更高优先级的任务</li>
-</ul>
-</li>
+<li>硬件中断触发，进入InterruptHandling()函数</li>
+<li>ISR只做简单的记录和清除标志工作</li>
+<li>ISR调用portYIELD_FROM_ISR(pdTRUE)强制任务切换</li>
+<li>调度器选择最高优先级的就绪任务</li>
+<li>如果中断处理任务vInterruptHandling()是最高优先级，它会立即执行</li>
+<li>中断处理任务分析并处理中断数据</li>
 </ol>
-<h2 id="内存池分配">内存池分配</h2>
-<p>内存池分配是指在程序编译阶段就分配一定数量的内存块留作备用。当有新的内存需求时，就从内存块分出一部分内存块，若内存块不够了就继续申请新的内存。</p>
-<p>当FreeRTOS需要RAM的时候，它会调用pvPortMalloc这个函数而不是Malloc这个系统函数；当它需要释放内存的时候，会调用vPortFree这个函数而不是free这个系统函数。各提供了5种实现方案(heap_1.c,heap_2.c,heap_3.c,heap_4.c,heap_5.c),同时支持定制。stm32cubemx默认采用4。</p>
-<h3 id="heap-1">heap_1</h3>
-<p>适用于小型嵌入式系统。且<strong>只能在调度器启动之前</strong>创建任务和其他内核对象。<br>
-内存只需要在程序启动调度器前采用first fit算法对内存进行动态分配，之后任务的内存分配在程序的运行周期中<strong>保持不变并且无法被释放</strong>。<br>
-确定性的，不会导致内存碎片化,执行时间固定。<br>
-使用静态数组作为堆内存。数组大小由FreeRTOSConfig.h文件中ConfigTOTAL_HEAP_SIZE定义。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">xTaskCreate(myTask, <span class="string">&quot;Task1&quot;</span>, <span class="number">100</span>, <span class="literal">NULL</span>, <span class="number">1</span>, <span class="literal">NULL</span>);</span><br><span class="line">xQueueCreate(<span class="number">10</span>, <span class="keyword">sizeof</span>(<span class="type">uint32_t</span>));</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/heap-and-stack/heap1.png" alt="heap1" loading="lazy"></p>
-<h3 id="heap-2-不推荐使用？">heap_2(不推荐使用？)</h3>
-<p>内存管理也由一个数组实现，大小由FreeRTOSConfig.h文件中configTOTAL_HEAP_SIZE定义<br>
-使用best fit算法对内存进行动态分配，允许释放内存。对大的内存块进行分割，但无法合并相连的内存块，容易导致内存的碎片化。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> *buffer = pvPortMalloc(<span class="number">50</span>);  <span class="comment">// 分配50字节</span></span><br><span class="line"><span class="comment">// 使用内存...</span></span><br><span class="line">vPortFree(buffer);  <span class="comment">// 释放内存</span></span><br></pre></td></tr></table></figure>
-<p><img src="/2025/heap-and-stack/heap2.png" alt="heap_2" loading="lazy"></p>
-<h3 id="heap-3">heap_3</h3>
-<p>使用标准C库的malloc() free()函数<br>
-添加了互斥锁使其线程安全，调用malloc函数和free函数的时候会临时挂起FreeRTOS的调度器。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 和标准C库函数名相同，但内部添加了互斥保护</span></span><br><span class="line"><span class="type">void</span> *data = <span class="built_in">malloc</span>(<span class="number">100</span>);</span><br><span class="line"><span class="built_in">free</span>(data);</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/heap-and-stack/heap3.png" alt="heap_3" loading="lazy"></p>
-<h3 id="heap-4">heap_4</h3>
-<p>内存可以自由分配和合并空闲的内存块，并使得整体的性能最优。<br>
-使用&quot;首次匹配&quot;算法（使用第一个足够大的空闲块）<br>
-Heap_4的分配方案所需要时间是不确定性的，但速度要比malloc和free函数快。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 频繁分配释放也不会导致严重的内存碎片</span></span><br><span class="line"><span class="keyword">for</span>(<span class="type">int</span> i=<span class="number">0</span>; i&lt;<span class="number">1000</span>; i++) &#123;</span><br><span class="line">    <span class="type">void</span> *temp = pvPortMalloc(random_size());</span><br><span class="line">    <span class="comment">// 使用内存...</span></span><br><span class="line">    vPortFree(temp);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
-<p><img src="/2025/heap-and-stack/heap4.jpg" alt="heap_4" loading="lazy"></p>
-<h3 id="heap-5">heap_5</h3>
-<p>类似于Heap_4的内存分配技术，但不同于Heap_4只用一个连续的数组表示堆，Heap_5可以用不同的数组空间对内存进行分配。要使用vPortDefineHeapRegions这个函数对不同的数组进行申明。</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 初始化多区域内存</span></span><br><span class="line"><span class="comment">// 添加内部SRAM区域</span></span><br><span class="line">HeapRegion_t xHeapRegions[] = &#123;</span><br><span class="line">    &#123; (<span class="type">uint8_t</span>*)<span class="number">0x20000000</span>, <span class="number">0x10000</span> &#125;,  <span class="comment">// 内部SRAM: 64KB</span></span><br><span class="line">    &#123; (<span class="type">uint8_t</span>*)<span class="number">0x60000000</span>, <span class="number">0x80000</span> &#125;,  <span class="comment">// 外部SRAM: 512KB</span></span><br><span class="line">    &#123; <span class="literal">NULL</span>, <span class="number">0</span> &#125;  <span class="comment">// 终止标记</span></span><br><span class="line">&#125;;</span><br><span class="line">vPortDefineHeapRegions(xHeapRegions);</span><br><span class="line"></span><br><span class="line"><span class="comment">// 之后正常使用</span></span><br><span class="line"><span class="type">void</span> *buffer = pvPortMalloc(<span class="number">1000</span>);</span><br><span class="line"></span><br></pre></td></tr></table></figure>
-<p><img src="/2025/heap-and-stack/heap5.png" alt="heap5" loading="lazy"></p>
-<h2 id="内存管理相关函数">内存管理相关函数</h2>
-<p><code>size_t xPortGetFreeHeapSize( void );</code><br>
-这个函数会返回当前堆中的空闲空间大小（单位是字节），可以用来优化堆空间大小。比如在系统运行起来后调用xPortGetFreeHeapSize如果返回了3000字节，就可以把堆大小configTOTAL_HEAP_SIZE设置为3000字节多一点。</p>
-<p><code>size_t xPortGetMinimumEverFreeHeapSize( void );</code><br>
-这个函数会返回在系统运行过程中堆空间的最小空闲空间，如果最小空闲空间很小的话可以考虑提高堆大小configTOTAL_HEAP_SIZE的值。这个函数只能在Heap_4或者Heap_5下调用。</p>
-<p><code>void vApplicationMallocFailedHook( void );</code><br>
-这是一个回调函数，需要用户自己实现。如果配置文件中configUSE_MALLOC_FAILED_HOOK 设置为1的话，当堆分配内存失败时会调用此函数。用户可以在此函数中进行错误处理。</p>
+<p>一般还会搭配信号量，队列等机制来避免一直处于高优先级就绪态，阻塞其他任务执行。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">vInterruptHandlingTask</span><span class="params">(<span class="type">void</span> *pvParameters)</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">for</span>(;;) &#123;</span><br><span class="line">        <span class="comment">// 等待中断通知，这里任务进入阻塞态</span></span><br><span class="line">        <span class="comment">// 只有当接收到通知时，任务才会变为就绪态</span></span><br><span class="line">        <span class="keyword">if</span>(xSemaphoreTake(xInterruptSemaphore, portMAX_DELAY) == pdTRUE) &#123;</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 处理中断相关的工作</span></span><br><span class="line">            ProcessInterrupt();</span><br><span class="line">            </span><br><span class="line">            <span class="comment">// 处理完成后，循环回到开头，再次尝试获取信号量</span></span><br><span class="line">            <span class="comment">// 如果没有新的中断发生，任务会再次阻塞在这里</span></span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
       </div>
       
         <div class="prev-or-next">
           <div class="post-foot-next">
             
+              <a href="/2025/task-management/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
           </div>
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2025-09-07 19:41:33
+              2025-09-07 19:40:59
             </span>
             
                   <span class="post-tags">
@@ -309,7 +243,7 @@ Heap_4的分配方案所需要时间是不确定性的，但速度要比malloc�
           </div>
           <div class="post-foot-prev">
             
-              <a href="/2025/queue-management/" target="_self">
+              <a href="/2025/software-timer/" target="_self">
                 <span>下一页</span>
                 <i class="iconfont icon-chevronright"></i>
               </a>
@@ -326,7 +260,7 @@ Heap_4的分配方案所需要时间是不确定性的，但速度要比malloc�
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link"><span class="toc-text">freertos堆栈</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E5%A6%82%E4%BD%95%E5%88%86%E9%85%8D%E7%A9%BA%E9%97%B4"><span class="toc-text">任务如何分配空间</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#TCB%E7%9A%84%E5%A4%A7%E5%B0%8F%E6%9E%84%E6%88%90"><span class="toc-text">TCB的大小构成</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#MSP%E5%92%8CPSP%E6%A0%88%E6%8C%87%E9%92%88"><span class="toc-text">MSP和PSP栈指针</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E6%B1%A0%E5%88%86%E9%85%8D"><span class="toc-text">内存池分配</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#heap-1"><span class="toc-text">heap_1</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#heap-2-%E4%B8%8D%E6%8E%A8%E8%8D%90%E4%BD%BF%E7%94%A8%EF%BC%9F"><span class="toc-text">heap_2(不推荐使用？)</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#heap-3"><span class="toc-text">heap_3</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#heap-4"><span class="toc-text">heap_4</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#heap-5"><span class="toc-text">heap_5</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%86%85%E5%AD%98%E7%AE%A1%E7%90%86%E7%9B%B8%E5%85%B3%E5%87%BD%E6%95%B0"><span class="toc-text">内存管理相关函数</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%AD%E6%96%AD%E6%B3%A8%E6%84%8F%E4%BA%8B%E9%A1%B9"><span class="toc-text">中断注意事项</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FreeRTOS%E4%B8%AD%E6%96%AD%E7%AE%A1%E7%90%86"><span class="toc-text">FreeRTOS中断管理</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%BB%B6%E8%BF%9F%E4%B8%AD%E6%96%AD%E5%A4%84%E7%90%86"><span class="toc-text">延迟中断处理</span></a></li></ol>
       
     </div>
   </div>
@@ -614,12 +548,12 @@ Heap_4的分配方案所需要时间是不确定性的，但速度要比malloc�
       </a>
       <div class="share-content hidden">
         
-          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + heap-and-stack + '&url=' + https%3A%2F%2Fchoosen123.github.io%2F2025%2Fheap-and-stack%2F + '" target="_blank" title="Twitter">
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + interrupt-management + '&url=' + https%3A%2F%2Fchoosen123.github.io%2F2025%2Finterrupt-management%2F + '" target="_blank" title="Twitter">
             <i class="iconfont icon-twitter"></i>
           </a>
         
         
-          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://choosen123.github.io/2025/heap-and-stack/" target="_blank" title="Facebook">
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://choosen123.github.io/2025/interrupt-management/" target="_blank" title="Facebook">
             <i class="iconfont icon-facebooksquare"></i>
           </a>
         
