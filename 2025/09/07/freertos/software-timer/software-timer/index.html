@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="HomesickAlien" />
+  <!-- Open Graph Description 简短摘要-->
+  
+  <!-- 用于搜索引擎的文章摘要 -->
+  
+  
+  
+  <title>
+    
+     Blogs
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <link rel="icon" href="/images/favicon.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img src="/images/avatar.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/">HomesickAlien</a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">Archives</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="nav-item" data-path="/about/">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title"></div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2025-09-07 18:22:10
+        </span>
+        
+      </div>
+      <div class="markdown-body">
+        <h2 id="软件定时器和硬件定时器"><a href="#软件定时器和硬件定时器" class="headerlink" title="软件定时器和硬件定时器"></a>软件定时器和硬件定时器</h2><ol>
+<li>硬件定时器：芯片内部的一个独立外设单元（stm32中TIM1等）。</li>
+<li>软件定时器：基于系统时钟中断且由软件来模拟的定时器，当经过设定的Tick 时钟计数值后会触发用户定义的回调函数。软件定时器本身基本不占用CPU资源，只有在回调函数被执行时才会用到CPU。</li>
+</ol>
+<p>为了启用软件定时器，需要在头文件FreeRTOSConfig.h中设置<code>configUSE_TIMERS</code>的值为1。</p>
+<p>回调函数原型：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">ATimerCallback</span><span class="params">( TimerHandle_t xTimer )</span>;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>xTimer是定时器句柄  </li>
+<li>回调函数代码应该尽可能地简短紧凑，并且避免调用FreeRTOS的API函数防止进入阻塞状态。</li>
+</ul>
+<h2 id="软件定时器的状态"><a href="#软件定时器的状态" class="headerlink" title="软件定时器的状态"></a>软件定时器的状态</h2><ul>
+<li>静止状态(Dormant)：处于静止装态的定时器不会执行回调函数，可以通过调用定时器的句柄启用</li>
+<li>运行状态(Running)：处于运行状态的定时器会在设定的时间间隔（相对于定时器进入运行状态后）到达后调用回调函数。</li>
+</ul>
+<h2 id="软件定时器类型"><a href="#软件定时器类型" class="headerlink" title="软件定时器类型"></a>软件定时器类型</h2><ol>
+<li>一次性定时器(One-shot timer)：启动后只会执行一次回调函数。</li>
+</ol>
+<ul>
+<li>一次性定时器会在执行回调函数后进入静止状态<br><img src="/./image/once.png" alt="One-shot"></li>
+</ul>
+<ol start="2">
+<li>自动重载定时器(Auto-reload timer)：周期性执行回调函数。</li>
+</ol>
+<ul>
+<li>自动重载定时器会在执行回调函数后重新进入运行状态<br><img src="/./image/auto-reload.png" alt="Auto-reload"></li>
+</ul>
+<h2 id="软件定时器实质"><a href="#软件定时器实质" class="headerlink" title="软件定时器实质"></a>软件定时器实质</h2><p>软件定时器是由一个系统内核调度器自动生成的时间服务任务(Timer Server Task)来管理。当创建并启动一个软件定时器时，定时器对象会被加入到时间服务任务管理的定时器列表里。时间服务任务会周期性检查这些定时器是否到期，到期则调用你注册的回调函数。<br>在FreeRTOSConfig.h中相关配置  </p>
+<ul>
+<li>configTIMER_TASK_PRIORITY：决定了时间服务任务的运行优先级。优先级越高，定时器到期后回调就能更快被执行。</li>
+<li>configTIMER_TASK_STACK_DEPTH：决定了时间服务任务的栈大小（单位通常是字节或“栈深度”）。</li>
+</ul>
+<p>避免在回调函数中调用会阻塞的FreeRTOS api，会阻塞时间服务任务，导致其他定时器无法及时处理，严重时影响系统定时精度甚至死锁。  </p>
+<p>软件定时器的启动、停止、重置等操作，并不是立即生效，而是通过“命令队列”发送到时间服务任务中去处理。<br>这个队列的长度由<code>configTIMER_QUEUE_LENGTH</code>决定。</p>
+<h2 id="图形化配置界面"><a href="#图形化配置界面" class="headerlink" title="图形化配置界面"></a>图形化配置界面</h2><p><img src="/./image/cubemx.png" alt="cubemx"><br>Callback选项是由用户实现的回调函数，Type选项可以选择一次性定时器或者自动重载定时器。</p>
+<h2 id="FreeRTOS-定时器相关-API-函数说明"><a href="#FreeRTOS-定时器相关-API-函数说明" class="headerlink" title="FreeRTOS 定时器相关 API 函数说明"></a>FreeRTOS 定时器相关 API 函数说明</h2><ol>
+<li>创建定时器</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TimerHandle_t <span class="title function_">xTimerCreate</span><span class="params">( <span class="type">const</span> <span class="type">char</span> * <span class="type">const</span> pcTimerName,</span></span><br><span class="line"><span class="params">                           TickType_t xTimerPeriodInTicks,</span></span><br><span class="line"><span class="params">                           UBaseType_t uxAutoReload,</span></span><br><span class="line"><span class="params">                           <span class="type">void</span> * pvTimerID,</span></span><br><span class="line"><span class="params">                           TimerCallbackFunction_t pxCallbackFunction )</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>功能</strong>：创建定时器。</li>
+<li><strong>参数说明</strong>：<ul>
+<li><code>pcTimerName</code>：定时器的名称，仅用于调试。</li>
+<li><code>xTimerPeriodInTicks</code>：定时器的周期（以tick为单位），可用<code>pdMS_TO_TICKS()</code>宏将毫秒转换为tick。</li>
+<li><code>uxAutoReload</code>：设为<code>pdTRUE</code>时为自动重载定时器，<code>pdFALSE</code>为一次性定时器。</li>
+<li><code>pvTimerID</code>：定时器的ID，可用于用户自定义目的。</li>
+<li><code>pxCallbackFunction</code>：定时器到期时执行的回调函数。</li>
+</ul>
+</li>
+<li><strong>返回值</strong>：<ul>
+<li>非<code>NULL</code>表示创建成功；</li>
+<li><code>NULL</code>表示创建失败。</li>
+</ul>
+</li>
+</ul>
+<ol start="2">
+<li>启动定时器</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BaseType_t <span class="title function_">xTimerStart</span><span class="params">( TimerHandle_t xTimer, TickType_t xTicksToWait )</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>功能</strong>：启动定时器。</li>
+<li><strong>参数说明</strong>：<ul>
+<li><code>xTimer</code>：要启动的定时器句柄。</li>
+<li><code>xTicksToWait</code>：如果命令队列已满，最多等待多少tick。</li>
+</ul>
+</li>
+<li><strong>返回值</strong>：<ul>
+<li><code>pdPASS</code>表示启动成功；</li>
+<li><code>pdFALSE</code>表示失败。</li>
+</ul>
+</li>
+</ul>
+<ol start="3">
+<li>设置定时器ID</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">vTimerSetTimerID</span><span class="params">( <span class="type">const</span> TimerHandle_t xTimer, <span class="type">void</span> *pvNewID )</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>功能</strong>：设置定时器的<code>pvTimerID</code>属性。</li>
+<li><strong>参数说明</strong>：<ul>
+<li><code>xTimer</code>：定时器句柄。</li>
+<li><code>pvNewID</code>：要设置的新ID值。</li>
+</ul>
+</li>
+</ul>
+<ol start="4">
+<li>获取定时器ID</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> *<span class="title function_">pvTimerGetTimerID</span><span class="params">( TimerHandle_t xTimer )</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>功能</strong>：获取定时器的<code>pvTimerID</code>属性。</li>
+<li><strong>参数说明</strong>：<ul>
+<li><code>xTimer</code>：定时器句柄。</li>
+</ul>
+</li>
+<li><strong>返回值</strong>：<code>pvTimerID</code>的值。</li>
+</ul>
+<ol start="5">
+<li>改变定时器周期</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BaseType_t <span class="title function_">xTimerChangePeriod</span><span class="params">( TimerHandle_t xTimer, </span></span><br><span class="line"><span class="params">                              TickType_t xNewTimerPeriodInTicks,</span></span><br><span class="line"><span class="params">                              TickType_t xTicksToWait )</span></span><br></pre></td></tr></table></figure>
+
+<ul>
+<li><strong>功能</strong>：改变定时器的运行周期。</li>
+<li><strong>参数说明</strong>：<ul>
+<li><code>xTimer</code>：定时器句柄。</li>
+<li><code>xNewTimerPeriodInTicks</code>：新的定时器周期（tick），可用<code>pdMS_TO_TICKS()</code>转换。</li>
+<li><code>xTicksToWait</code>：如果命令队列已满，最多等待多少tick。</li>
+</ul>
+</li>
+<li><strong>返回值</strong>：<ul>
+<li><code>pdPASS</code>表示成功；</li>
+<li><code>pdFALSE</code>表示失败。</li>
+</ul>
+</li>
+</ul>
+<ol start="6">
+<li>重置定时器</li>
+</ol>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BaseType_t <span class="title function_">xTimerReset</span><span class="params">( TimerHandle_t xTimer, TickType_t xTicksToWait )</span></span><br></pre></td></tr></table></figure>
+<ul>
+<li><strong>功能</strong>：重置定时器，重新开始计时。</li>
+<li><strong>参数说明</strong>：<ul>
+<li><code>xTimer</code>：定时器句柄。</li>
+<li><code>xTicksToWait</code>：如果命令队列已满，最多等待多少tick。</li>
+</ul>
+</li>
+<li><strong>返回值</strong>：<ul>
+<li><code>pdPASS</code>表示成功；</li>
+<li><code>pdFALSE</code>表示失败。</li>
+</ul>
+</li>
+</ul>
+<h2 id="定时器ID作用"><a href="#定时器ID作用" class="headerlink" title="定时器ID作用"></a>定时器ID作用</h2><ul>
+<li>多个定时器共用同一个回调函数时，可以通过ID判断当前是哪个定时器触发  </li>
+<li>pvTimerID 是一个 void* 指针，可以指向任何类型的数据结构，如整型、结构体、数组等。可以在回调函数里获得上下文信息（如相关任务句柄、设备句柄、状态数据等）</li>
+</ul>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">vTimerCallback</span><span class="params">(TimerHandle_t xTimer)</span>&#123;</span><br><span class="line"><span class="type">void</span> *pvID = pvTimerGetTimerID(xTimer);</span><br><span class="line"><span class="comment">// 根据ID做不同的操作</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/2025/09/07/freertos/task-management/task-management/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2025-09-07 18:22:10
+            </span>
+            
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/2025/09/07/freertos/queue-management/queue-management/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8%E5%92%8C%E7%A1%AC%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8"><span class="toc-text">软件定时器和硬件定时器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-text">软件定时器的状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8%E7%B1%BB%E5%9E%8B"><span class="toc-text">软件定时器类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8%E5%AE%9E%E8%B4%A8"><span class="toc-text">软件定时器实质</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE%E5%BD%A2%E5%8C%96%E9%85%8D%E7%BD%AE%E7%95%8C%E9%9D%A2"><span class="toc-text">图形化配置界面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FreeRTOS-%E5%AE%9A%E6%97%B6%E5%99%A8%E7%9B%B8%E5%85%B3-API-%E5%87%BD%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="toc-text">FreeRTOS 定时器相关 API 函数说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9A%E6%97%B6%E5%99%A8ID%E4%BD%9C%E7%94%A8"><span class="toc-text">定时器ID作用</span></a></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          
+              <a title="github" target="_blank" rel="noopener" href="https://github.com/Choosen123">
+                <i class="iconfont icon-github"></i>
+              </a>
+              
+        </li>
+        
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Copyright © 2025 Oranges</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+</div>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="搜索...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' +  + '&url=' + http%3A%2F%2Fexample.com%2F2025%2F09%2F07%2Ffreertos%2Fsoftware-timer%2Fsoftware-timer%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://example.com/2025/09/07/freertos/software-timer/software-timer/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
+  
+  
+<script src="/js/shares.js"></script>
+
+
+
+      </div>
+    </div>
+  </body>
+</html>

@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="HomesickAlien" />
+  <!-- Open Graph Description 简短摘要-->
+  
+  <!-- 用于搜索引擎的文章摘要 -->
+  
+  
+  
+  <title>
+    
+     Blogs
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <link rel="icon" href="/images/favicon.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img src="/images/avatar.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/">HomesickAlien</a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">Archives</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+        <li class="nav-item" data-path="/about/">
+          <a href="/about/">About</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title"></div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2025-09-07 18:22:10
+        </span>
+        
+      </div>
+      <div class="markdown-body">
+        <h1 id="freertos任务管理"><a href="#freertos任务管理" class="headerlink" title="freertos任务管理"></a>freertos任务管理</h1><hr>
+<h2 id="任务"><a href="#任务" class="headerlink" title="任务"></a>任务</h2><p>在FreeRTOS中，线程（Thread）和任务（Task）的概念是相同的。每个任务就是一个线程，有着自己的一个程序。  </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">TaskFunction</span><span class="params">( <span class="type">void</span> *pvParameters )</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int32_t</span> test = <span class="number">10</span>; </span><br><span class="line">  <span class="keyword">for</span>(;;)</span><br><span class="line">  &#123;</span><br><span class="line">  &#125;</span><br><span class="line">  vTaskDelete(<span class="literal">NULL</span>);  </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<ul>
+<li>任务函数不能有返回值，即使用return语句。</li>
+<li>不需要任务时必须显示删除任务，如调用vTaskDelete()函数。</li>
+<li>每个任务都有自己的栈区和优先级。</li>
+</ul>
+<h2 id="任务的状态"><a href="#任务的状态" class="headerlink" title="任务的状态"></a>任务的状态</h2><ul>
+<li>就绪状态（Ready）<ul>
+<li>任务已准备好运行，但尚未被调度器选中执行</li>
+<li>可能有多个任务同时处于就绪态</li>
+<li>形成就绪列表，调度器从中选择最高优先级任务运行</li>
+</ul>
+</li>
+<li>运行状态（Running）<ul>
+<li>当前正在处理器上执行的任务</li>
+<li>单核系统中任何时刻只能有一个任务处于运行态</li>
+<li>由调度器选择优先级最高的就绪任务进入</li>
+</ul>
+</li>
+<li>阻塞状态（Blocked）<ul>
+<li>任务暂时不能执行，等待某个事件或超时</li>
+<li>有明确的超时时间或等待条件</li>
+<li>不参与调度器的任务选择</li>
+</ul>
+</li>
+<li>挂起状态（Suspended）<ul>
+<li>任务被明确挂起，不参与调度 </li>
+<li>没有超时机制，必须由其他任务或中断显示恢复</li>
+<li>用于长期停止任务执行</li>
+</ul>
+  <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 挂起任务示例</span></span><br><span class="line">vTaskSuspend(xTaskHandle); <span class="comment">// 将任务挂起</span></span><br><span class="line"><span class="comment">// ...其他代码</span></span><br><span class="line">vTaskResume(xTaskHandle);  <span class="comment">// 将任务从挂起态恢复</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<p>freertos任务状态转换<br><img src="/./image/freertos-task.png" alt="freertos任务管理"> </p>
+<p>cmsis rtos 接口<br><img src="/./image/cmsis-rtos-task.png" alt="cmsis rtos 接口"> </p>
+<h2 id="任务优先级"><a href="#任务优先级" class="headerlink" title="任务优先级"></a>任务优先级</h2><p>可以通过vTaskPrioritySet()设置。<br>FreeRTOSConfig.h头文件中的configMAX_PRIORITIES可以设置最高优先级的值。0最低，configMAX_PRIORITIES-1最高。</p>
+<p>configMAX_PRIORITIES受configUSE_PORT_OPTIMISED_TASK_SELECTION参数值影响。</p>
+<ul>
+<li><p>当configUSE_PORT_OPTIMISED_TASK_SELECTION值设为0时，代表通用方式。configMAX_PRIORITIES最大值不受限制。</p>
+<ul>
+<li>但不建议设置太高，会增加RAM占用,程序最坏运行时间更长。<blockquote>
+<p>原因：freertos调度器通过为每个优先级维护独立的任务就绪列表来工作,就绪列表通常存储在一个数组中：List_t pxReadyTasksLists[ configMAX_PRIORITIES ]：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">&gt;优先级0 → 就绪列表0 → [任务A] → [任务B]</span><br><span class="line">&gt;优先级1 → 就绪列表1 → [任务C]</span><br><span class="line">&gt;优先级2 → 就绪列表2 → [任务D] → [任务E] → [任务F]</span><br><span class="line">&gt;优先级N → 就绪列表N → [空]   </span><br></pre></td></tr></table></figure></blockquote>
+</li>
+</ul>
+</li>
+<li><p>当configUSE_PORT_OPTIMISED_TASK_SELECTION值设为1时，代表架构优化方式。架构优化方式采用了平台相关的汇编代码，比通用方式更快，configMAX_PRIORITIES的值不会影响程序的最坏运行时间。在这种方式下，configMAX_PRIORITIES的最大值不能超过32。因为是平台相关，不是所有的单片机支持这个方式。</p>
+</li>
+</ul>
+<h2 id="任务创建"><a href="#任务创建" class="headerlink" title="任务创建"></a>任务创建</h2><p>使用xTaskCreate()函数创建。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">BaseType_t <span class="title function_">xTaskCreate</span><span class="params">( TaskFunction_t pvTaskCode,</span></span><br><span class="line"><span class="params">                        <span class="type">const</span> <span class="type">char</span> * <span class="type">const</span> pcName,</span></span><br><span class="line"><span class="params">                        <span class="type">uint16_t</span> usStackDepth,</span></span><br><span class="line"><span class="params">                        <span class="type">void</span> *pvParameters,</span></span><br><span class="line"><span class="params">                        UBaseType_t uxPriority,</span></span><br><span class="line"><span class="params">                        TaskHandle_t *pxCreatedTask )</span>;</span><br></pre></td></tr></table></figure>
+
+<ul>
+<li>pvTaskCode:函数指针，指向执行任务的函数</li>
+<li>pcName:任务描述名称，方便调试，不需要设为NULL</li>
+<li>usStackDepth:栈空间大小，单位是字（word）（Cortex-M通常为4字节一字）</li>
+<li>pvParameters:传递给任务的参数指针，不需要设为NULL</li>
+<li>uxPriority:设置任务优先级，0~configMAX_PRIORITIES-1 </li>
+<li>pxCreatedTask:指向任务句柄的指针，通过句柄对任务进行设置，如改变优先级，任务状态，不需要设为NULL</li>
+<li>函数返回值：成功返回<code>pdPass</code>(1),失败返回<code>errCOULD_NOT_ALLOCATE_REQUIRED_MEMORY</code>(-1)</li>
+</ul>
+<p><img src="/./image/task-stack.png" alt="task-stack"> </p>
+<blockquote>
+<p>CMSIS RTOS api 使用osThreadNew()函数创建任务，其封装了xTaskCreate()函数</p>
+</blockquote>
+<h2 id="调度器"><a href="#调度器" class="headerlink" title="调度器"></a>调度器</h2><p>调度器（scheduler）简单来说是一个决定哪个任务应该执行的算法代码。在FreeRTOS中采用了round-robin的调度算法，包含抢占式（preemptive）和合作式（cooperative）两种模式。模式的选择在FreeRTOSConfig.h头文件中由configUSE_PREEMPTION这个参数决定，为1时是抢占式模式，为0时是合作式模式。  </p>
+<ol>
+<li>抢占式 <blockquote>
+<p>在抢占式模式下，在每次调度器运行时，高优先级的任务会被切换优先执行，当前处于运行状态的低优先级的任务则会立刻进入就绪状态等待运行，如下图所示，高优先级的Task2抢占了Task1。如果几个任务的优先级一样的话，它们就会轮流执行共享CPU资源。<br><img src="/./image/preemptive.png" alt="preemptive"> </p>
+</blockquote>
+</li>
+<li>合作式 <blockquote>
+<p>在合作式模式下，高优先级任务不会抢占当前正在运行状态的低优先级任务，直到低优先级任务完成进入阻塞状态（比如调用osDelay()函数）或就绪状态（比如调用osThreadYield()函数）或者被系统置于挂起状态后才会切换任务，如下图所示。<br><img src="/./image/cooperative.png" alt="cooperative"></p>
+</blockquote>
+</li>
+</ol>
+<p>Stm32CubeMX中，USE_PREEMPTION为Eabled时采用抢占式，Disabled为合作式<br><img src="/./image/cubemx.png" alt="Stm32CubeMX"> </p>
+<h2 id="任务调度"><a href="#任务调度" class="headerlink" title="任务调度"></a>任务调度</h2><p>FreeRTOS对任务的调度采用基于时间片（time slicing）的方式。时间片，顾名思义，把一段时间等分成了很多个时间段，在每一个时间段保证优先级最高的任务能执行，同时如果几个任务拥有相等的优先级，则它们会轮流使用每个时间段占用CPU资源。调度器会在每个时间片结束的时候通过周期中断（tick interrupt）执行一次，调度器根据设置的抢占式还是合作式模式选择哪个任务在下一个时间片会运行。</p>
+<p>时间片的大小由configTICK_RATE_HZ这个参数设置。如果configTICK_RATE_HZ设置为10HZ，则时间片的大小为100ms。configTICK_RATE_HZ的值由应用需求决定，通常设为100HZ（时间片大小相应为10ms）。</p>
+<blockquote>
+<p><img src="/./image/task0management.png" alt="task-management"><br>在上图任务调度的演示中，Kernel表示系统内核即调度程序，Task1和Task2是两个优先级相同的任务。t1到t2是一个时间片，t2到t3是另一个时间片。在每一个时间片快结束的时候，调度程序通过周期中断（tick interrupt）被调用并选择在下一个时间片要执行的任务（红色部分代表调度程序Kernel在运行）。此时因为两个任务的优先级相同，调度程序会让两个任务轮流占用时间片进行运行（蓝色部分代表Task1在运行，绿色部分代表Task2在运行）  </p>
+</blockquote>
+<p>可以把FreeRTOS当成一个时间离散的系统（时间并不是连续的），时间的最小单位是一个节拍（tick），延时函数 vTaskDelayUntil和vTaskDelay的参数需要的是延时的节拍数，不能直接设置延时时间，因此使用 pdMS_TO_TICKS 函数将时间转换为节拍数。通过pdMS_TO_TICKS这个函数可以把时间转换成节拍数（一个节拍代表一个时间片），并且调用这个函数可以保证即使configTICK_RATE_HZ的值不同时时间是一致的。</p>
+<ol>
+<li>抢占式时间片调度<blockquote>
+<p>内核调度器在每个时间片结束的时候执行一次，选择处于就绪状态的任务中优先级最高的任务置于下一个时间片执行。如果优先级相同的话则交替执行。此时，FreeRTOSConfig.h头文件的设置如下：<br> configUSE_PREEMPTION（允许抢占） 1<br> configUSE_TIME_SLICING（采用时间片） 1<br> <img src="/./image/preemptive-time-slip.png" alt="抢占式时间片"> </p>
+</blockquote>
+</li>
+<li>抢占式无时间片调度<blockquote>
+<p>这种调度方式下，因为没有采取时间片，所以调度器的执行开销会比较小。如果两个任务的优先级相同的话，在抢占式时间片调度下，两个任务会交替运行；在抢占式无时间片调度下，当前运行的任务会一直运行，直到它进入阻塞或者挂起状态，另一个相同优先级的任务才会运行。高优先级的任务会抢占低优先任务。此时，FreeRTOSConfig.h头文件的设置如下：<br>configUSE_PREEMPTION（允许抢占） 1<br>configUSE_TIME_SLICING（采用时间片） 0<br><img src="/./image/preemptive-without-time-slip.png" alt="抢占式无时间片"> </p>
+</blockquote>
+</li>
+<li>合作式调度</li>
+</ol>
+<h2 id="空闲任务-Idle-Task"><a href="#空闲任务-Idle-Task" class="headerlink" title="空闲任务(Idle Task)"></a>空闲任务(Idle Task)</h2><p><code>vTaskStartScheduler()</code>函数用来启动调度器。空闲任务是调用器启动后自动创建的一个任务。</p>
+<p>FreeRTOS的设计原则是：调度器必须永远有一个可以运行的任务。即使所有用户任务都在等待事件（比如等待一个信号量、一个队列消息或者一个延时到期），系统也必须有事可做。<br>空闲任务就是为了保证始终至少有一个任务处于就绪（Ready）状态而存在的。<br>空闲任务特点:</p>
+<ul>
+<li>优先级为0,最低的优先级确保空闲任务不会抢占用户任务。当用户创建的任务都在阻塞或者挂起状态时，空闲任务才执行。</li>
+<li>负责清理内核资源，当有任务被删除后，确保空闲任务能运行清理和回收内核资源。</li>
+</ul>
+<p>同时，空闲任务可以绑定一个钩子任务（Task Hook），当空闲任务运行的时候钩子任务也会被自动调用。钩子任务里可以添加测量空闲任务运行时间的函数或者把系统放入低功耗模式的函数。空闲任务运行的时间反映出了系统的可用计算资源，可以用于推算CPU的占用率。CPU的占用率过高的话可能会对系统的实时性有影响。  </p>
+<p>钩子任务的函数原型是<code>vApplicationIdleHook( void )</code>;</p>
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2025-09-07 18:22:10
+            </span>
+            
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/2025/09/07/freertos/software-timer/software-timer/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#freertos%E4%BB%BB%E5%8A%A1%E7%AE%A1%E7%90%86"><span class="toc-text">freertos任务管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1"><span class="toc-text">任务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-text">任务的状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E4%BC%98%E5%85%88%E7%BA%A7"><span class="toc-text">任务优先级</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E5%88%9B%E5%BB%BA"><span class="toc-text">任务创建</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%B0%83%E5%BA%A6%E5%99%A8"><span class="toc-text">调度器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%BB%BB%E5%8A%A1%E8%B0%83%E5%BA%A6"><span class="toc-text">任务调度</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%A9%BA%E9%97%B2%E4%BB%BB%E5%8A%A1-Idle-Task"><span class="toc-text">空闲任务(Idle Task)</span></a></li></ol></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          
+              <a title="github" target="_blank" rel="noopener" href="https://github.com/Choosen123">
+                <i class="iconfont icon-github"></i>
+              </a>
+              
+        </li>
+        
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Copyright © 2025 Oranges</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+</div>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="搜索...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' +  + '&url=' + http%3A%2F%2Fexample.com%2F2025%2F09%2F07%2Ffreertos%2Ftask-management%2Ftask-management%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=http://example.com/2025/09/07/freertos/task-management/task-management/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
+  
+  
+<script src="/js/shares.js"></script>
+
+
+
+      </div>
+    </div>
+  </body>
+</html>
