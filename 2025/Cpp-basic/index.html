@@ -13,7 +13,7 @@
   
   <title>
     
-      software-timer 
+      Cpp-basic 
       
       
       |
@@ -145,19 +145,19 @@
   <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
   <div class="container post-details" id="post-details">
     <div class="post-content">
-      <div class="post-title">software-timer</div>
+      <div class="post-title">Cpp-basic</div>
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2025-09-07 19:40:49
+          2025-09-08 13:29:21
         </span>
         
               <span class="post-tags">
                 <i class="iconfont icon-tags mr-10" title="标签"></i>
                 
                 <span class="span--tag mr-8">
-                  <a href="/tags/FreeRTOS/" title="FreeRTOS">
-                    #FreeRTOS
+                  <a href="/tags/Cpp/" title="Cpp">
+                    #Cpp
                   </a>
                 </span>
                 
@@ -165,171 +165,112 @@
           
       </div>
       <div class="markdown-body">
-        <h2 id="软件定时器和硬件定时器">软件定时器和硬件定时器</h2>
-<ol>
-<li>硬件定时器：芯片内部的一个独立外设单元（stm32中TIM1等）。</li>
-<li>软件定时器：基于系统时钟中断且由软件来模拟的定时器，当经过设定的Tick 时钟计数值后会触发用户定义的回调函数。软件定时器本身基本不占用CPU资源，只有在回调函数被执行时才会用到CPU。</li>
-</ol>
-<p>为了启用软件定时器，需要在头文件FreeRTOSConfig.h中设置<code>configUSE_TIMERS</code>的值为1。</p>
-<p>回调函数原型：</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">ATimerCallback</span><span class="params">( TimerHandle_t xTimer )</span>;</span><br></pre></td></tr></table></figure>
+        <p>static<br>
+静态方法不能引用非静态变量<br>
+非静态成员变量是对象的一部分，每个对象的非静态成员变量都有独立的存储空间。而静态成员函数属于类，与具体的对象无关。<br>
+//每个非静态方法总是获得当前类的一个实例做参数</p>
+<p>枚举enum</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">enum</span> <span class="title class_">name</span> : <span class="type">unsigned</span> <span class="type">char</span>   <span class="comment">//指定类型 </span></span><br><span class="line">&#123;</span><br><span class="line">A=<span class="number">2</span>,B=<span class="number">4</span>,C=<span class="number">7</span>      <span class="comment">//</span></span><br><span class="line">&#125;</span><br><span class="line">name c = A;</span><br></pre></td></tr></table></figure>
+<p>构造函数——每次构造类实例时，自动执行的函数</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Entity</span></span><br><span class="line">&#123;</span><br><span class="line">    <span class="keyword">public</span>:</span><br><span class="line">    <span class="type">float</span> X,Y;</span><br><span class="line"><span class="built_in">Entity</span>()&#123;</span><br><span class="line">&#125;</span><br><span class="line"><span class="built_in">Entity</span>(<span class="type">float</span> x,<span class="type">float</span> y)&#123;      <span class="comment">//带参数的构造函数，使用时构造带参实例    Entity e(1.0,2.3)</span></span><br><span class="line">    X=x;</span><br><span class="line">    Y=y;</span><br><span class="line">&#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>存在一个默认构造函数，但啥也没干</p>
+<p>Log类默认构造函数被删除（delete），因此无法构造实例<br>
+初始化列表是C++中用于在构造函数中初始化类成员变量的一种语法结构。它提供了一种高效且简洁的方式来初始化成员变量，尤其是在处理类的继承和资源管理时非常有用。下面将详细介绍初始化列表的语法、用途和一些最佳实践。<br>
+初始化列表的语法初始化列表位于构造函数的参数列表之后，使用冒号：分隔，后面跟着一个用逗号分隔的成员变量初始化列表。基本语法如下：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="built_in">ClassName</span>(ConstructorParameters) : <span class="built_in">Member1</span>(Initializer1), <span class="built_in">Member2</span>(Initializer2), ... &#123;</span><br><span class="line">    <span class="comment">// 构造函数体</span></span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Player</span> &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="comment">// 构造函数</span></span><br><span class="line">    <span class="built_in">Player</span>(<span class="type">const</span> std::string&amp; name, <span class="type">int</span> age) : <span class="built_in">m_Name</span>(name), <span class="built_in">m_Age</span>(age) &#123;</span><br><span class="line">        <span class="comment">// 构造函数体可以为空，因为所有初始化工作都在初始化列表中完成了</span></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">// 成员函数</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">DisplayInfo</span><span class="params">()</span> <span class="type">const</span> </span>&#123;</span><br><span class="line">        std::cout &lt;&lt; <span class="string">&quot;Player Name: &quot;</span> &lt;&lt; m_Name &lt;&lt; <span class="string">&quot;, Age: &quot;</span> &lt;&lt; m_Age &lt;&lt; std::endl;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    std::string m_Name;  <span class="comment">// 成员变量</span></span><br><span class="line">    <span class="type">int</span> m_Age;           <span class="comment">// 成员变量</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+<p>使用初始化列表可避免创建两个实例</p>
+<p>析构函数——实例删除时执行<br>
+~Entity(){<br>
+}</p>
+<p>继承——子类包含父类的所有</p>
 <ul>
-<li>xTimer是定时器句柄</li>
-<li>回调函数代码应该尽可能地简短紧凑，并且避免调用FreeRTOS的API函数防止进入阻塞状态。</li>
+<li>public<br>
+：公有继承。基类的公有成员和保护成员在派生类中仍然是公有成员和保护成员，可以被派生类的成员函数以及派生类对象直接访问。</li>
+<li>protected<br>
+：保护继承。基类的公有成员和保护成员在派生类中成为保护成员，可以被派生类的成员函数访问，但不能被派生类对象直接访问。</li>
+<li>private<br>
+：私有继承。基类的公有成员和保护成员在派生类中成为私有成员，只能被派生类的成员函数访问，派生类对象和其他函数都无法直接访问。</li>
 </ul>
-<h2 id="软件定时器的状态">软件定时器的状态</h2>
+<p>Entity* e = new Entity();<br>
+使用new运算符在堆（heap）上创建了一个Entity类的实例，并将该实例的地址赋值给指针变量e</p>
 <ul>
-<li>静止状态(Dormant)：处于静止装态的定时器不会执行回调函数，可以通过调用定时器的句柄启用</li>
-<li>运行状态(Running)：处于运行状态的定时器会在设定的时间间隔（相对于定时器进入运行状态后）到达后调用回调函数。</li>
+<li>new是C++中的一个运算符，用于在堆上动态分配内存并构造对象。</li>
+<li>使用 new 分配的内存必须使用 delete 释放，否则会导致内存泄漏<br>
+ClassName* pointer = new ClassName(parameters);<br>
+虚函数</li>
 </ul>
-<h2 id="软件定时器类型">软件定时器类型</h2>
-<ol>
-<li>一次性定时器(One-shot timer)：启动后只会执行一次回调函数。</li>
-</ol>
-<ul>
-<li>一次性定时器会在执行回调函数后进入静止状态<br>
-<img src="/2025/software-timer/once.png" alt="One-shot" loading="lazy"></li>
-</ul>
-<ol start="2">
-<li>自动重载定时器(Auto-reload timer)：周期性执行回调函数。</li>
-</ol>
-<ul>
-<li>自动重载定时器会在执行回调函数后重新进入运行状态<br>
-<img src="/2025/software-timer/auto-reload.png" alt="Auto-reload" loading="lazy"></li>
-</ul>
-<h2 id="软件定时器实质">软件定时器实质</h2>
-<p>软件定时器是由一个系统内核调度器自动生成的时间服务任务(Timer Server Task)来管理。当创建并启动一个软件定时器时，定时器对象会被加入到时间服务任务管理的定时器列表里。时间服务任务会周期性检查这些定时器是否到期，到期则调用你注册的回调函数。<br>
-在FreeRTOSConfig.h中相关配置</p>
-<ul>
-<li>configTIMER_TASK_PRIORITY：决定了时间服务任务的运行优先级。优先级越高，定时器到期后回调就能更快被执行。</li>
-<li>configTIMER_TASK_STACK_DEPTH：决定了时间服务任务的栈大小（单位通常是字节或“栈深度”）。</li>
-</ul>
-<p>避免在回调函数中调用会阻塞的FreeRTOS api，会阻塞时间服务任务，导致其他定时器无法及时处理，严重时影响系统定时精度甚至死锁。</p>
-<p>软件定时器的启动、停止、重置等操作，并不是立即生效，而是通过“命令队列”发送到时间服务任务中去处理。<br>
-这个队列的长度由<code>configTIMER_QUEUE_LENGTH</code>决定。</p>
-<h2 id="图形化配置界面">图形化配置界面</h2>
-<p><img src="/2025/software-timer/cubemx.png" alt="cubemx" loading="lazy"><br>
-Callback选项是由用户实现的回调函数，Type选项可以选择一次性定时器或者自动重载定时器。</p>
-<h2 id="FreeRTOS-定时器相关-API-函数说明">FreeRTOS 定时器相关 API 函数说明</h2>
-<ol>
-<li>创建定时器</li>
-</ol>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">TimerHandle_t <span class="title function_">xTimerCreate</span><span class="params">( <span class="type">const</span> <span class="type">char</span> * <span class="type">const</span> pcTimerName,</span></span><br><span class="line"><span class="params">                           TickType_t xTimerPeriodInTicks,</span></span><br><span class="line"><span class="params">                           UBaseType_t uxAutoReload,</span></span><br><span class="line"><span class="params">                           <span class="type">void</span> * pvTimerID,</span></span><br><span class="line"><span class="params">                           TimerCallbackFunction_t pxCallbackFunction )</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><strong>功能</strong>：创建定时器。</li>
-<li><strong>参数说明</strong>：
-<ul>
-<li><code>pcTimerName</code>：定时器的名称，仅用于调试。</li>
-<li><code>xTimerPeriodInTicks</code>：定时器的周期（以tick为单位），可用<code>pdMS_TO_TICKS()</code>宏将毫秒转换为tick。</li>
-<li><code>uxAutoReload</code>：设为<code>pdTRUE</code>时为自动重载定时器，<code>pdFALSE</code>为一次性定时器。</li>
-<li><code>pvTimerID</code>：定时器的ID，可用于用户自定义目的。</li>
-<li><code>pxCallbackFunction</code>：定时器到期时执行的回调函数。</li>
-</ul>
-</li>
-<li><strong>返回值</strong>：
-<ul>
-<li>非<code>NULL</code>表示创建成功；</li>
-<li><code>NULL</code>表示创建失败。</li>
-</ul>
-</li>
-</ul>
-<ol start="2">
-<li>启动定时器</li>
-</ol>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BaseType_t <span class="title function_">xTimerStart</span><span class="params">( TimerHandle_t xTimer, TickType_t xTicksToWait )</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><strong>功能</strong>：启动定时器。</li>
-<li><strong>参数说明</strong>：
-<ul>
-<li><code>xTimer</code>：要启动的定时器句柄。</li>
-<li><code>xTicksToWait</code>：如果命令队列已满，最多等待多少tick。</li>
-</ul>
-</li>
-<li><strong>返回值</strong>：
-<ul>
-<li><code>pdPASS</code>表示启动成功；</li>
-<li><code>pdFALSE</code>表示失败。</li>
-</ul>
-</li>
-</ul>
-<ol start="3">
-<li>设置定时器ID</li>
-</ol>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">vTimerSetTimerID</span><span class="params">( <span class="type">const</span> TimerHandle_t xTimer, <span class="type">void</span> *pvNewID )</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><strong>功能</strong>：设置定时器的<code>pvTimerID</code>属性。</li>
-<li><strong>参数说明</strong>：
-<ul>
-<li><code>xTimer</code>：定时器句柄。</li>
-<li><code>pvNewID</code>：要设置的新ID值。</li>
-</ul>
-</li>
-</ul>
-<ol start="4">
-<li>获取定时器ID</li>
-</ol>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> *<span class="title function_">pvTimerGetTimerID</span><span class="params">( TimerHandle_t xTimer )</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><strong>功能</strong>：获取定时器的<code>pvTimerID</code>属性。</li>
-<li><strong>参数说明</strong>：
-<ul>
-<li><code>xTimer</code>：定时器句柄。</li>
-</ul>
-</li>
-<li><strong>返回值</strong>：<code>pvTimerID</code>的值。</li>
-</ul>
-<ol start="5">
-<li>改变定时器周期</li>
-</ol>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">BaseType_t <span class="title function_">xTimerChangePeriod</span><span class="params">( TimerHandle_t xTimer, </span></span><br><span class="line"><span class="params">                              TickType_t xNewTimerPeriodInTicks,</span></span><br><span class="line"><span class="params">                              TickType_t xTicksToWait )</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><strong>功能</strong>：改变定时器的运行周期。</li>
-<li><strong>参数说明</strong>：
-<ul>
-<li><code>xTimer</code>：定时器句柄。</li>
-<li><code>xNewTimerPeriodInTicks</code>：新的定时器周期（tick），可用<code>pdMS_TO_TICKS()</code>转换。</li>
-<li><code>xTicksToWait</code>：如果命令队列已满，最多等待多少tick。</li>
-</ul>
-</li>
-<li><strong>返回值</strong>：
-<ul>
-<li><code>pdPASS</code>表示成功；</li>
-<li><code>pdFALSE</code>表示失败。</li>
-</ul>
-</li>
-</ul>
-<ol start="6">
-<li>重置定时器</li>
-</ol>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">BaseType_t <span class="title function_">xTimerReset</span><span class="params">( TimerHandle_t xTimer, TickType_t xTicksToWait )</span></span><br></pre></td></tr></table></figure>
-<ul>
-<li><strong>功能</strong>：重置定时器，重新开始计时。</li>
-<li><strong>参数说明</strong>：
-<ul>
-<li><code>xTimer</code>：定时器句柄。</li>
-<li><code>xTicksToWait</code>：如果命令队列已满，最多等待多少tick。</li>
-</ul>
-</li>
-<li><strong>返回值</strong>：
-<ul>
-<li><code>pdPASS</code>表示成功；</li>
-<li><code>pdFALSE</code>表示失败。</li>
-</ul>
-</li>
-</ul>
-<h2 id="定时器ID作用">定时器ID作用</h2>
-<ul>
-<li>多个定时器共用同一个回调函数时，可以通过ID判断当前是哪个定时器触发</li>
-<li>pvTimerID 是一个 void* 指针，可以指向任何类型的数据结构，如整型、结构体、数组等。可以在回调函数里获得上下文信息（如相关任务句柄、设备句柄、状态数据等）</li>
-</ul>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">vTimerCallback</span><span class="params">(TimerHandle_t xTimer)</span>&#123;</span><br><span class="line"><span class="type">void</span> *pvID = pvTimerGetTimerID(xTimer);</span><br><span class="line"><span class="comment">// 根据ID做不同的操作</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>输出：全为Entity类的GetName<br>
+C++会在Entity内部找GetName()而不是用户希望的Player内部<br>
+解决：基类中加上virtual，子类中加override</p>
+<p>纯虚函数——virtual … = 0;<br>
+具有纯虚函数的类无法实例，其子类也必须在自身或者更上级实现纯虚函数覆写之后才能实例。<br>
+可以定义一个基类，内部写入纯虚函数，其子类可以各自覆写，然后将抽象基类作为参数（如指针）放入一个通用的函数中<br>
+子类必须实现，否则无法实例化</p>
+<p>C++可见性：<br>
+private：只有类自身和友元可以访问，子类也不行<br>
+protected：类自身，子类，外部不可见<br>
+public：都可以</p>
+<p>std::string<br>
+cout 字符串要包括 <string><br>
+双引号内是const char 数组</p>
+<p>std::string name = std ::string(“Cherno”) + “hello!”;<br>
+name.find(“”)<br>
+字符串作为函数参数输入，尽量const std::string &amp; string，避免复制</p>
+<p>字符串字面量<br>
+char* name = “Cherno”;<br>
+const cahr* name = “Cherno”<br>
+储存在const区，修改是未定义的<br>
+wchar_t—L char16_t—u char32_t—U</p>
+<p>类中的const<br>
+不能改变类中变量值，只能读取</p>
+<p>变量加上前缀mutable 可以改动<br>
+实例调用含const修饰的函数，本身必须也要用const修饰</p>
+<p>创建对象<br>
+1.在栈上创建 能用这个就用这个<br>
+2.在堆上 特殊情况，特殊要求     使用new    必须手动释放</p>
+<p>argv[0] 是程序的名称，<br>
+argv[1] 到 argv[argc-1] 包含传递给程序的其他参数。</p>
+<p>基于范围的 for 循环（Range-based for loop）是一种简化遍历容器（如数组、向量、列表等）的语法<br>
+for (元素类型 元素变量 : 容器) {<br>
+// 使用元素变量<br>
+}</p>
+<p>for(rclcpp::Parameter n : params){<br>
+RCLCPP_INFO(this-&gt;get_logger(),“key = %s , value = %s”,n.get_name().c_str(),n.value_to_string().c_str());</p>
+<pre><code>//判断是否含有
+  RCLCPP_INFO(this-&gt;get_logger(),&quot;是否包含%s? %d&quot;,n.get_name().c_str(),this-&gt;has_parameter(n.get_name()));
+
+&#125;
+</code></pre>
+<p>std::to_string: 数字等转换成字符串<br>
+cin.getline() :接收一个字符串，可以接收空格并输出<br>
+1、cin.getline()实际上有三个参数，cin.getline(接收字符串的变量,接收字符个数,结束字符)<br>
+2、当第三个参数省略时，系统默认为’\0’<br>
+3、如果将例子中cin.getline()改为cin.getline(m,5,‘a’);当输入jlkjkljkl时输出jklj，输入jkaljkljkl时，输出jk<br>
+#include <iostream><br>
+using namespace std;<br>
+main ()<br>
+{<br>
+char m[20];<br>
+cin.getline(m,5);<br>
+cout&lt;&lt;m&lt;&lt;endl;<br>
+}<br>
+getline():接收一个字符串，可以接收空格并输出，需包含“#include<string>”<br>
+#include<iostream><br>
+#include<string><br>
+using namespace std;<br>
+main ()<br>
+{<br>
+string str;<br>
+getline(cin,str);<br>
+cout&lt;&lt;str&lt;&lt;endl;<br>
+}</p>
 
       </div>
       
         <div class="prev-or-next">
           <div class="post-foot-next">
             
-              <a href="/2025/interrupt-management/" target="_self">
+              <a href="/2025/software-timer/" target="_self">
                 <i class="iconfont icon-chevronleft"></i>
                 <span>上一页</span>
               </a>
@@ -338,15 +279,15 @@ Callback选项是由用户实现的回调函数，Type选项可以选择一次�
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2025-09-07 19:40:49
+              2025-09-08 13:29:21
             </span>
             
                   <span class="post-tags">
                     <i class="iconfont icon-tags mr-10" title="标签"></i>
                     
                     <span class="span--tag mr-8">
-                      <a href="/tags/FreeRTOS/" title="FreeRTOS">
-                        #FreeRTOS
+                      <a href="/tags/Cpp/" title="Cpp">
+                        #Cpp
                       </a>
                     </span>
                     
@@ -355,7 +296,7 @@ Callback选项是由用户实现的回调函数，Type选项可以选择一次�
           </div>
           <div class="post-foot-prev">
             
-              <a href="/2025/Cpp-basic/" target="_self">
+              <a href="/2025/Semaphore-and-Mutex/" target="_self">
                 <span>下一页</span>
                 <i class="iconfont icon-chevronright"></i>
               </a>
@@ -365,23 +306,6 @@ Callback选项是由用户实现的回调函数，Type选项可以选择一次�
       
     </div>
     
-  <div id="btn-catalog" class="btn-catalog">
-    <i class="iconfont icon-catalog"></i>
-  </div>
-  <div class="post-catalog hidden" id="catalog">
-    <div class="title">目录</div>
-    <div class="catalog-content">
-      
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8%E5%92%8C%E7%A1%AC%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8"><span class="toc-text">软件定时器和硬件定时器</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8%E7%9A%84%E7%8A%B6%E6%80%81"><span class="toc-text">软件定时器的状态</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8%E7%B1%BB%E5%9E%8B"><span class="toc-text">软件定时器类型</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%BD%AF%E4%BB%B6%E5%AE%9A%E6%97%B6%E5%99%A8%E5%AE%9E%E8%B4%A8"><span class="toc-text">软件定时器实质</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9B%BE%E5%BD%A2%E5%8C%96%E9%85%8D%E7%BD%AE%E7%95%8C%E9%9D%A2"><span class="toc-text">图形化配置界面</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#FreeRTOS-%E5%AE%9A%E6%97%B6%E5%99%A8%E7%9B%B8%E5%85%B3-API-%E5%87%BD%E6%95%B0%E8%AF%B4%E6%98%8E"><span class="toc-text">FreeRTOS 定时器相关 API 函数说明</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%9A%E6%97%B6%E5%99%A8ID%E4%BD%9C%E7%94%A8"><span class="toc-text">定时器ID作用</span></a></li></ol>
-      
-    </div>
-  </div>
-
-  
-<script src="/js/catalog.js"></script>
-
-
-
 
     
       <div class="comments-container">
@@ -660,12 +584,12 @@ Callback选项是由用户实现的回调函数，Type选项可以选择一次�
       </a>
       <div class="share-content hidden">
         
-          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + software-timer + '&url=' + https%3A%2F%2Fchoosen123.github.io%2F2025%2Fsoftware-timer%2F + '" target="_blank" title="Twitter">
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + Cpp-basic + '&url=' + https%3A%2F%2Fchoosen123.github.io%2F2025%2FCpp-basic%2F + '" target="_blank" title="Twitter">
             <i class="iconfont icon-twitter"></i>
           </a>
         
         
-          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://choosen123.github.io/2025/software-timer/" target="_blank" title="Facebook">
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://choosen123.github.io/2025/Cpp-basic/" target="_blank" title="Facebook">
             <i class="iconfont icon-facebooksquare"></i>
           </a>
         
