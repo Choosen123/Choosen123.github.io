@@ -149,7 +149,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2025-09-10 19:21:33
+          2025-09-10 19:25:25
         </span>
         
               <span class="post-tags">
@@ -177,7 +177,7 @@
 <li>计数信号量<br>
 信号量数目为多个，可以通知解锁多个任务。</li>
 </ol>
-<p><img src="/./Semaphore-and-Mutex/Binary-Counting.png" alt="Binary-and-Counting" loading="lazy"></p>
+<p><img src="/2025/Semaphore-and-Mutex/Binary-Counting.png" alt="Binary-and-Counting" loading="lazy"></p>
 <h2 id="常见API">常见API</h2>
 <ol>
 <li>创建二进制信号量</li>
@@ -218,11 +218,11 @@
 <p>二进制信号量适用于在数据产生的频率比较低的场合。如果数据产生的频率较高，因为信号量最多只能保存一个信号，更多产生的数据将会直接被忽略抛弃。此时需要使用计数信号量（counting semaphore）。</p>
 <p>当有多个生产任务时，单纯依赖信号量，无法区分是谁生产的资源。可以使用队列传递资源信息。</p>
 <h2 id="信号量的资源保护作用">信号量的资源保护作用</h2>
-<p><img src="/./Semaphore-and-Mutex/Semaphore-protection.png" alt="Semaphore-Protection" loading="lazy"><br>
+<p><img src="/2025/Semaphore-and-Mutex/Semaphore-protection.png" alt="Semaphore-Protection" loading="lazy"><br>
 在上图中，有个低优先级的任务（LP）和高优先级的任务（HP），两个任务都可以对一个资源进行操作。为了对资源进行保护采用了信号量的机制。LP首先获得信号量可以对资源进行操作，在时刻1，HP因为优先级高在内核调度中抢占了LP，在时刻2，HP想获得信号量但失败因此进入了阻塞状态。之后LP可以继续对资源操作，在时刻3执行完毕后归还了信号量。在时刻4，HP因为优先级高在内核调度中抢占了LP并获取了信号量可以对资源可以操作。</p>
 <h2 id="优先级倒置">优先级倒置</h2>
 <p>采用信号量保护资源的话会有个弊端，有时会产生一种现象叫做优先级倒置（Priority inversion ）。</p>
-<p><img src="/./Semaphore-and-Mutex/Priority-Inversion.png" alt="Priority-Inversion" loading="lazy"></p>
+<p><img src="/2025/Semaphore-and-Mutex/Priority-Inversion.png" alt="Priority-Inversion" loading="lazy"></p>
 <h2 id="改善-互斥量">改善-互斥量</h2>
 <p>互斥量是二进制信号量的变种，需在FreeRTOSConfig.h设置<code>configUSE_MUTEXES</code>为1。用于确保同一时间只有一个任务能访问共享资源，防止多任务并发访问导致的数据不一致问题。</p>
 <table>
@@ -282,7 +282,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2025-09-10 19:21:33
+              2025-09-10 19:25:25
             </span>
             
                   <span class="post-tags">
