@@ -218,6 +218,50 @@ taskENTER_CRITICAL()宏定义会关闭所有中断包括内核切换所在的中
       </tags>
   </entry>
   <entry>
+    <title>can-bus</title>
+    <url>/2025/can-bus/</url>
+    <content><![CDATA[结构
+
+闭环（高速CAN）
+
+
+CAN总线网络由ISO 11898标准定义，是高速、短距离的CAN网络，通信速率为125kbit/s到1Mbit/s。在1Mbit/s通讯速率时，总线长度最长达40m。
+
+开环（低速CAN）
+
+
+两根信号线独立，各自串联一个2.2k欧的电阻。这种CAN总线网络由ISO11519-2标准定义，是低速、远距离的CAN网络，通信速率最高125kbit/s。在40kbit/s速率时，总线最长距离可达1000m。
+基本
+CAN总线有两条信号线，CANH和CANL,没有时钟同步信号线，是一种半双工异步通信，类似于UART。两根信号线通常使用双绞线，传输差分信号（有效抑制外部电磁干扰）。
+下面只讨论高速CAN。
+以CANH和CANL间的电压差代表总线电平，与逻辑信号1或0对应。
+
+隐性电平(Recessive)对应于逻辑1
+显性电平(Dominant)对应于逻辑0
+
+高速CAN中隐性电平在电压差0附近，显性电平主要在电压差2V附近。
+
+CAN总线上的一个终端设备称为一个节点(Node)，没有主设备从设备的区别。一个CAN节点的硬件部分一般由两部分组成：
+
+CAN控制器：实现CAN协议逻辑层功能，构建符合CAN协议的数据帧等，仲裁等等。
+CAN收发器：实现MCU逻辑电平与物理CAN总线电平之间的转换。
+例如发送数据流程：
+
+微控制器将数据传送给CAN控制器
+CAN控制器构建符合协议的数据帧
+CAN控制器将逻辑电平信号发送给收发器
+收发器将逻辑信号转换为CAN总线差分信号
+
+
+
+仲裁机制： CAN总线采用非破坏性仲裁机制，通过比较消息标识符的优先级来决定哪个节点有权继续发送数据。这种机制确保了总线上数据传输的有序性，避免了冲突。
+广播通信： CAN总线采用广播通信方式，即发送的数据帧可以被总线上的所有节点接收。这种特性有助于信息的共享和同步，同时减少了系统的复杂性。
+]]></content>
+      <tags>
+        <tag>CAN总线通信</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>heap-and-stack</title>
     <url>/2025/heap-and-stack/</url>
     <content><![CDATA[freertos堆栈
@@ -395,6 +439,43 @@ void vInterruptHandlingTask(void *pvParameters)&#123;    for(;;) &#123;        /
       <tags>
         <tag>FreeRTOS</tag>
       </tags>
+  </entry>
+  <entry>
+    <title>pi5-ImmortalWrt</title>
+    <url>/2025/pi5-ImmortalWrt/</url>
+    <content><![CDATA[刷入固件
+
+注：使用rpi-imager重刷固件时，必须刷写与之前不同格式的镜像(ext4、squashfs)。否则似乎并没有格式化。原因不清楚，如果在原有基础上升级？或者重刷，或许应该使用官方提供的另一款镜像？
+
+先不要插网线，启动树莓派。
+配置
+连接名为&quot;ImmortWrt&quot;的无线网，然后访问192.168.1.1进入管理界面。默认用户名root，密码passwd。
+
+将树莓派作为主路由，光猫处于桥接模式，引出网线插到树莓派网口接入WAN口,板载无线网卡作为LAN
+口供连接使用。树莓派同时负责拨号上网。
+配置LAN口
+
+
+注意设备的选择，选择无线
+ipv4地址决定了访问管理界面输入的网址
+
+配置WAN口
+
+
+选择PPPoE拨号，输入宽带密码(忘记编辑短信czkdmn发给10086重置密码)
+设备选择有线网卡
+听说关闭ipv6能提高网速？
+
+至此可保存一下，试试是否成功，然后可以插上网线了。
+配置无线接入点
+很简单。
+更改wifi名：
+
+更改wifi密码：
+
+注意：保存更改时，要重新连接到修改后的wifi才能修改成功。不然会在时间结束后弹出配置失败。
+安装插件待更新
+]]></content>
   </entry>
   <entry>
     <title>queue-management</title>

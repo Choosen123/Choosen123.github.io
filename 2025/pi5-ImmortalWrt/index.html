@@ -13,7 +13,7 @@
   
   <title>
     
-      archive_a: 2025 
+      pi5-ImmortalWrt 
       
       
       |
@@ -100,104 +100,150 @@
 
 
       <div class="flex-container">
-        <!-- 归档页，展示本站所有文章，按照年份降序归类，url形式：https://yoursite/archives/ -->
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
 
-<!-- last: 按年份把文章分组，当前遍历到的年份 -->
-<!-- now: 当前遍历到的文章的发布年份 -->
 
-<div class="container archives">
-  <div class="post-list">
-    
-        <!-- 后续文章的发布年份呈现 -->
-        <div class="content-title">
-          <h2>
-            <span>2025</span>
-          </h2>
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">pi5-ImmortalWrt</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2025-09-16 23:44:52
+        </span>
+        
+      </div>
+      <div class="markdown-body">
+        <h2 id="刷入固件">刷入固件</h2>
+<blockquote>
+<p>注：使用rpi-imager重刷固件时，必须刷写与之前不同格式的镜像(ext4、squashfs)。否则似乎并没有格式化。原因不清楚，如果在原有基础上升级？或者重刷，或许应该使用官方提供的另一款镜像？</p>
+</blockquote>
+<p>先不要插网线，启动树莓派。</p>
+<h2 id="配置">配置</h2>
+<p>连接名为&quot;ImmortWrt&quot;的无线网，然后访问192.168.1.1进入管理界面。默认用户名root，密码passwd。<br>
+<img src="/2025/pi5-ImmortalWrt/dashboard.png" alt="dashboard" loading="lazy"></p>
+<p>将树莓派作为主路由，光猫处于桥接模式，引出网线插到树莓派网口接入WAN口,板载无线网卡作为LAN<br>
+口供连接使用。树莓派同时负责拨号上网。</p>
+<h3 id="配置LAN口">配置LAN口</h3>
+<p><img src="/2025/pi5-ImmortalWrt/LAN-Configuration.png" alt="LAN-Configuration" loading="lazy"></p>
+<ul>
+<li>注意设备的选择，选择无线</li>
+<li>ipv4地址决定了访问管理界面输入的网址</li>
+</ul>
+<h3 id="配置WAN口">配置WAN口</h3>
+<p><img src="/2025/pi5-ImmortalWrt/WAN-Configuration.png" alt="WAN-Configuration" loading="lazy"></p>
+<ul>
+<li>选择PPPoE拨号，输入宽带密码(忘记编辑短信czkdmn发给10086重置密码)</li>
+<li>设备选择有线网卡</li>
+<li>听说关闭ipv6能提高网速？</li>
+</ul>
+<p>至此可保存一下，试试是否成功，然后可以插上网线了。</p>
+<h3 id="配置无线接入点">配置无线接入点</h3>
+<p>很简单。<br>
+更改wifi名：<br>
+<img src="/2025/pi5-ImmortalWrt/wifi-name.png" alt="wifi-name" loading="lazy"></p>
+<p>更改wifi密码：<br>
+<img src="/2025/pi5-ImmortalWrt/wifi-password.png" alt="wifi-password" loading="lazy"></p>
+<p>注意：保存更改时，要重新连接到修改后的wifi才能修改成功。不然会在时间结束后弹出配置失败。</p>
+<h2 id="安装插件待更新">安装插件待更新</h2>
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/2025/can-bus/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2025-09-16 23:44:52
+            </span>
+            
+          </div>
+          <div class="post-foot-prev">
+            
+          </div>
         </div>
       
-      <div class="post-item" title="pi5-ImmortalWrt">
-        <div class="time-m-d">09-16</div>
-        <div class="title">
-          <a href="/2025/pi5-ImmortalWrt/">
-            <span>pi5-ImmortalWrt</span>
-          </a>
-        </div>
-      </div>
+    </div>
     
-      <div class="post-item" title="can-bus">
-        <div class="time-m-d">09-15</div>
-        <div class="title">
-          <a href="/2025/can-bus/">
-            <span>can-bus</span>
-          </a>
-        </div>
-      </div>
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%88%B7%E5%85%A5%E5%9B%BA%E4%BB%B6"><span class="toc-text">刷入固件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE"><span class="toc-text">配置</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AELAN%E5%8F%A3"><span class="toc-text">配置LAN口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AEWAN%E5%8F%A3"><span class="toc-text">配置WAN口</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%85%8D%E7%BD%AE%E6%97%A0%E7%BA%BF%E6%8E%A5%E5%85%A5%E7%82%B9"><span class="toc-text">配置无线接入点</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%AE%89%E8%A3%85%E6%8F%92%E4%BB%B6%E5%BE%85%E6%9B%B4%E6%96%B0"><span class="toc-text">安装插件待更新</span></a></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
     
-      <div class="post-item" title="Semaphore-and-Mutex">
-        <div class="time-m-d">09-10</div>
-        <div class="title">
-          <a href="/2025/Semaphore-and-Mutex/">
-            <span>Semaphore-and-Mutex</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="Cpp-basic">
-        <div class="time-m-d">09-08</div>
-        <div class="title">
-          <a href="/2025/Cpp-basic/">
-            <span>Cpp-basic</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="software-timer">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/software-timer/">
-            <span>software-timer</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="interrupt-management">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/interrupt-management/">
-            <span>interrupt-management</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="task-management">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/task-management/">
-            <span>task-management</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="queue-management">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/queue-management/">
-            <span>queue-management</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="heap-and-stack">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/heap-and-stack/">
-            <span>heap-and-stack</span>
-          </a>
-        </div>
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
       </div>
     
   </div>
-</div>
+
 
         
 <div class="footer">
@@ -454,6 +500,24 @@
 
 
         
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + pi5-ImmortalWrt + '&url=' + https%3A%2F%2Fchoosen123.github.io%2F2025%2Fpi5-ImmortalWrt%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://choosen123.github.io/2025/pi5-ImmortalWrt/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
   
   
 <script src="/js/shares.js"></script>

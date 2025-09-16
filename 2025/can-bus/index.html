@@ -13,7 +13,7 @@
   
   <title>
     
-      archive_a: 2025 
+      can-bus 
       
       
       |
@@ -100,104 +100,181 @@
 
 
       <div class="flex-container">
-        <!-- 归档页，展示本站所有文章，按照年份降序归类，url形式：https://yoursite/archives/ -->
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
 
-<!-- last: 按年份把文章分组，当前遍历到的年份 -->
-<!-- now: 当前遍历到的文章的发布年份 -->
 
-<div class="container archives">
-  <div class="post-list">
-    
-        <!-- 后续文章的发布年份呈现 -->
-        <div class="content-title">
-          <h2>
-            <span>2025</span>
-          </h2>
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">can-bus</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2025-09-15 20:43:36
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/CAN%E6%80%BB%E7%BA%BF%E9%80%9A%E4%BF%A1/" title="CAN总线通信">
+                    #CAN总线通信
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h2 id="结构">结构</h2>
+<ol>
+<li>闭环（高速CAN）<br>
+<img src="/./can-bus/open-can.jpg" alt="闭环CAN" loading="lazy"></li>
+</ol>
+<p>CAN总线网络由ISO 11898标准定义，是高速、短距离的CAN网络，通信速率为125kbit/s到1Mbit/s。在1Mbit/s通讯速率时，总线长度最长达40m。</p>
+<ol start="2">
+<li>开环（低速CAN）<br>
+<img src="/./can-bus/close-can.jpg" alt="开环CAN" loading="lazy"></li>
+</ol>
+<p>两根信号线独立，各自串联一个2.2k欧的电阻。这种CAN总线网络由ISO11519-2标准定义，是低速、远距离的CAN网络，通信速率最高125kbit/s。在40kbit/s速率时，总线最长距离可达1000m。</p>
+<h2 id="基本">基本</h2>
+<p>CAN总线有两条信号线，CANH和CANL,没有时钟同步信号线，是一种半双工异步通信，类似于UART。两根信号线通常使用双绞线，传输差分信号（有效抑制外部电磁干扰）。</p>
+<p>下面只讨论高速CAN。<br>
+以CANH和CANL间的电压差代表总线电平，与逻辑信号1或0对应。</p>
+<ul>
+<li>隐性电平(Recessive)对应于逻辑1</li>
+<li>显性电平(Dominant)对应于逻辑0<br>
+<img src="/./can-bus/voltage-level.jpg" alt="总线电平" loading="lazy"><br>
+高速CAN中隐性电平在电压差0附近，显性电平主要在电压差2V附近。</li>
+</ul>
+<p>CAN总线上的一个终端设备称为一个节点(Node)，没有主设备从设备的区别。一个CAN节点的硬件部分一般由两部分组成：</p>
+<ul>
+<li>CAN控制器：实现CAN协议逻辑层功能，构建符合CAN协议的数据帧等，仲裁等等。</li>
+<li>CAN收发器：实现MCU逻辑电平与物理CAN总线电平之间的转换。</li>
+<li>例如发送数据流程：
+<ul>
+<li>微控制器将数据传送给CAN控制器</li>
+<li>CAN控制器构建符合协议的数据帧</li>
+<li>CAN控制器将逻辑电平信号发送给收发器</li>
+<li>收发器将逻辑信号转换为CAN总线差分信号</li>
+</ul>
+</li>
+</ul>
+<p>仲裁机制： CAN总线采用非破坏性仲裁机制，通过比较消息标识符的优先级来决定哪个节点有权继续发送数据。这种机制确保了总线上数据传输的有序性，避免了冲突。</p>
+<p>广播通信： CAN总线采用广播通信方式，即发送的数据帧可以被总线上的所有节点接收。这种特性有助于信息的共享和同步，同时减少了系统的复杂性。</p>
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/2025/Semaphore-and-Mutex/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2025-09-15 20:43:36
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/CAN%E6%80%BB%E7%BA%BF%E9%80%9A%E4%BF%A1/" title="CAN总线通信">
+                        #CAN总线通信
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/2025/pi5-ImmortalWrt/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
         </div>
       
-      <div class="post-item" title="pi5-ImmortalWrt">
-        <div class="time-m-d">09-16</div>
-        <div class="title">
-          <a href="/2025/pi5-ImmortalWrt/">
-            <span>pi5-ImmortalWrt</span>
-          </a>
-        </div>
-      </div>
+    </div>
     
-      <div class="post-item" title="can-bus">
-        <div class="time-m-d">09-15</div>
-        <div class="title">
-          <a href="/2025/can-bus/">
-            <span>can-bus</span>
-          </a>
-        </div>
-      </div>
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC"><span class="toc-text">基本</span></a></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
     
-      <div class="post-item" title="Semaphore-and-Mutex">
-        <div class="time-m-d">09-10</div>
-        <div class="title">
-          <a href="/2025/Semaphore-and-Mutex/">
-            <span>Semaphore-and-Mutex</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="Cpp-basic">
-        <div class="time-m-d">09-08</div>
-        <div class="title">
-          <a href="/2025/Cpp-basic/">
-            <span>Cpp-basic</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="software-timer">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/software-timer/">
-            <span>software-timer</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="interrupt-management">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/interrupt-management/">
-            <span>interrupt-management</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="task-management">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/task-management/">
-            <span>task-management</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="queue-management">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/queue-management/">
-            <span>queue-management</span>
-          </a>
-        </div>
-      </div>
-    
-      <div class="post-item" title="heap-and-stack">
-        <div class="time-m-d">09-07</div>
-        <div class="title">
-          <a href="/2025/heap-and-stack/">
-            <span>heap-and-stack</span>
-          </a>
-        </div>
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
       </div>
     
   </div>
-</div>
+
 
         
 <div class="footer">
@@ -454,6 +531,24 @@
 
 
         
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + can-bus + '&url=' + https%3A%2F%2Fchoosen123.github.io%2F2025%2Fcan-bus%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://choosen123.github.io/2025/can-bus/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
   
   
 <script src="/js/shares.js"></script>
