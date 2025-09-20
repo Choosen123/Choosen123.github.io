@@ -1,113 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
-    <title>Cpp-basic</title>
-    <url>/2025/Cpp-basic/</url>
-    <content><![CDATA[static
-静态方法不能引用非静态变量
-非静态成员变量是对象的一部分，每个对象的非静态成员变量都有独立的存储空间。而静态成员函数属于类，与具体的对象无关。
-//每个非静态方法总是获得当前类的一个实例做参数
-枚举enum
-enum name : unsigned char   //指定类型 &#123;A=2,B=4,C=7      //&#125;name c = A;
-构造函数——每次构造类实例时，自动执行的函数
-class Entity&#123;    public:    float X,Y;Entity()&#123;&#125;Entity(float x,float y)&#123;      //带参数的构造函数，使用时构造带参实例    Entity e(1.0,2.3)    X=x;    Y=y;&#125;&#125;
-存在一个默认构造函数，但啥也没干
-Log类默认构造函数被删除（delete），因此无法构造实例
-初始化列表是C++中用于在构造函数中初始化类成员变量的一种语法结构。它提供了一种高效且简洁的方式来初始化成员变量，尤其是在处理类的继承和资源管理时非常有用。下面将详细介绍初始化列表的语法、用途和一些最佳实践。
-初始化列表的语法初始化列表位于构造函数的参数列表之后，使用冒号：分隔，后面跟着一个用逗号分隔的成员变量初始化列表。基本语法如下：
-ClassName(ConstructorParameters) : Member1(Initializer1), Member2(Initializer2), ... &#123;    // 构造函数体&#125;class Player &#123;public:    // 构造函数    Player(const std::string&amp; name, int age) : m_Name(name), m_Age(age) &#123;        // 构造函数体可以为空，因为所有初始化工作都在初始化列表中完成了    &#125;    // 成员函数    void DisplayInfo() const &#123;        std::cout &lt;&lt; &quot;Player Name: &quot; &lt;&lt; m_Name &lt;&lt; &quot;, Age: &quot; &lt;&lt; m_Age &lt;&lt; std::endl;    &#125;private:    std::string m_Name;  // 成员变量    int m_Age;           // 成员变量&#125;;
-使用初始化列表可避免创建两个实例
-析构函数——实例删除时执行
-~Entity(){
-}
-继承——子类包含父类的所有
-
-public
-：公有继承。基类的公有成员和保护成员在派生类中仍然是公有成员和保护成员，可以被派生类的成员函数以及派生类对象直接访问。
-protected
-：保护继承。基类的公有成员和保护成员在派生类中成为保护成员，可以被派生类的成员函数访问，但不能被派生类对象直接访问。
-private
-：私有继承。基类的公有成员和保护成员在派生类中成为私有成员，只能被派生类的成员函数访问，派生类对象和其他函数都无法直接访问。
-
-Entity* e = new Entity();
-使用new运算符在堆（heap）上创建了一个Entity类的实例，并将该实例的地址赋值给指针变量e
-
-new是C++中的一个运算符，用于在堆上动态分配内存并构造对象。
-使用 new 分配的内存必须使用 delete 释放，否则会导致内存泄漏
-ClassName* pointer = new ClassName(parameters);
-虚函数
-
-输出：全为Entity类的GetName
-C++会在Entity内部找GetName()而不是用户希望的Player内部
-解决：基类中加上virtual，子类中加override
-纯虚函数——virtual … = 0;
-具有纯虚函数的类无法实例，其子类也必须在自身或者更上级实现纯虚函数覆写之后才能实例。
-可以定义一个基类，内部写入纯虚函数，其子类可以各自覆写，然后将抽象基类作为参数（如指针）放入一个通用的函数中
-子类必须实现，否则无法实例化
-C++可见性：
-private：只有类自身和友元可以访问，子类也不行
-protected：类自身，子类，外部不可见
-public：都可以
-std::string
-cout 字符串要包括 
-双引号内是const char 数组
-std::string name = std ::string(“Cherno”) + “hello!”;
-name.find(“”)
-字符串作为函数参数输入，尽量const std::string &amp; string，避免复制
-字符串字面量
-char* name = “Cherno”;
-const cahr* name = “Cherno”
-储存在const区，修改是未定义的
-wchar_t—L char16_t—u char32_t—U
-类中的const
-不能改变类中变量值，只能读取
-变量加上前缀mutable 可以改动
-实例调用含const修饰的函数，本身必须也要用const修饰
-创建对象
-1.在栈上创建 能用这个就用这个
-2.在堆上 特殊情况，特殊要求     使用new    必须手动释放
-argv[0] 是程序的名称，
-argv[1] 到 argv[argc-1] 包含传递给程序的其他参数。
-基于范围的 for 循环（Range-based for loop）是一种简化遍历容器（如数组、向量、列表等）的语法
-for (元素类型 元素变量 : 容器) {
-// 使用元素变量
-}
-for(rclcpp::Parameter n : params){
-RCLCPP_INFO(this-&gt;get_logger(),“key = %s , value = %s”,n.get_name().c_str(),n.value_to_string().c_str());
-//判断是否含有
-  RCLCPP_INFO(this-&gt;get_logger(),&quot;是否包含%s? %d&quot;,n.get_name().c_str(),this-&gt;has_parameter(n.get_name()));
-
-&#125;
-
-std::to_string: 数字等转换成字符串
-cin.getline() :接收一个字符串，可以接收空格并输出
-1、cin.getline()实际上有三个参数，cin.getline(接收字符串的变量,接收字符个数,结束字符)
-2、当第三个参数省略时，系统默认为’\0’
-3、如果将例子中cin.getline()改为cin.getline(m,5,‘a’);当输入jlkjkljkl时输出jklj，输入jkaljkljkl时，输出jk
-#include 
-using namespace std;
-main ()
-{
-char m[20];
-cin.getline(m,5);
-cout&lt;&lt;m&lt;&lt;endl;
-}
-getline():接收一个字符串，可以接收空格并输出，需包含“#include”
-#include
-#include
-using namespace std;
-main ()
-{
-string str;
-getline(cin,str);
-cout&lt;&lt;str&lt;&lt;endl;
-}
-]]></content>
-      <tags>
-        <tag>Cpp</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>Semaphore-and-Mutex</title>
     <url>/2025/Semaphore-and-Mutex/</url>
     <content><![CDATA[数据的同步机制
@@ -215,6 +108,113 @@ taskENTER_CRITICAL()宏定义会关闭所有中断包括内核切换所在的中
 ]]></content>
       <tags>
         <tag>FreeRTOS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>Cpp-basic</title>
+    <url>/2025/Cpp-basic/</url>
+    <content><![CDATA[static
+静态方法不能引用非静态变量
+非静态成员变量是对象的一部分，每个对象的非静态成员变量都有独立的存储空间。而静态成员函数属于类，与具体的对象无关。
+//每个非静态方法总是获得当前类的一个实例做参数
+枚举enum
+enum name : unsigned char   //指定类型 &#123;A=2,B=4,C=7      //&#125;name c = A;
+构造函数——每次构造类实例时，自动执行的函数
+class Entity&#123;    public:    float X,Y;Entity()&#123;&#125;Entity(float x,float y)&#123;      //带参数的构造函数，使用时构造带参实例    Entity e(1.0,2.3)    X=x;    Y=y;&#125;&#125;
+存在一个默认构造函数，但啥也没干
+Log类默认构造函数被删除（delete），因此无法构造实例
+初始化列表是C++中用于在构造函数中初始化类成员变量的一种语法结构。它提供了一种高效且简洁的方式来初始化成员变量，尤其是在处理类的继承和资源管理时非常有用。下面将详细介绍初始化列表的语法、用途和一些最佳实践。
+初始化列表的语法初始化列表位于构造函数的参数列表之后，使用冒号：分隔，后面跟着一个用逗号分隔的成员变量初始化列表。基本语法如下：
+ClassName(ConstructorParameters) : Member1(Initializer1), Member2(Initializer2), ... &#123;    // 构造函数体&#125;class Player &#123;public:    // 构造函数    Player(const std::string&amp; name, int age) : m_Name(name), m_Age(age) &#123;        // 构造函数体可以为空，因为所有初始化工作都在初始化列表中完成了    &#125;    // 成员函数    void DisplayInfo() const &#123;        std::cout &lt;&lt; &quot;Player Name: &quot; &lt;&lt; m_Name &lt;&lt; &quot;, Age: &quot; &lt;&lt; m_Age &lt;&lt; std::endl;    &#125;private:    std::string m_Name;  // 成员变量    int m_Age;           // 成员变量&#125;;
+使用初始化列表可避免创建两个实例
+析构函数——实例删除时执行
+~Entity(){
+}
+继承——子类包含父类的所有
+
+public
+：公有继承。基类的公有成员和保护成员在派生类中仍然是公有成员和保护成员，可以被派生类的成员函数以及派生类对象直接访问。
+protected
+：保护继承。基类的公有成员和保护成员在派生类中成为保护成员，可以被派生类的成员函数访问，但不能被派生类对象直接访问。
+private
+：私有继承。基类的公有成员和保护成员在派生类中成为私有成员，只能被派生类的成员函数访问，派生类对象和其他函数都无法直接访问。
+
+Entity* e = new Entity();
+使用new运算符在堆（heap）上创建了一个Entity类的实例，并将该实例的地址赋值给指针变量e
+
+new是C++中的一个运算符，用于在堆上动态分配内存并构造对象。
+使用 new 分配的内存必须使用 delete 释放，否则会导致内存泄漏
+ClassName* pointer = new ClassName(parameters);
+虚函数
+
+输出：全为Entity类的GetName
+C++会在Entity内部找GetName()而不是用户希望的Player内部
+解决：基类中加上virtual，子类中加override
+纯虚函数——virtual … = 0;
+具有纯虚函数的类无法实例，其子类也必须在自身或者更上级实现纯虚函数覆写之后才能实例。
+可以定义一个基类，内部写入纯虚函数，其子类可以各自覆写，然后将抽象基类作为参数（如指针）放入一个通用的函数中
+子类必须实现，否则无法实例化
+C++可见性：
+private：只有类自身和友元可以访问，子类也不行
+protected：类自身，子类，外部不可见
+public：都可以
+std::string
+cout 字符串要包括 
+双引号内是const char 数组
+std::string name = std ::string(“Cherno”) + “hello!”;
+name.find(“”)
+字符串作为函数参数输入，尽量const std::string &amp; string，避免复制
+字符串字面量
+char* name = “Cherno”;
+const cahr* name = “Cherno”
+储存在const区，修改是未定义的
+wchar_t—L char16_t—u char32_t—U
+类中的const
+不能改变类中变量值，只能读取
+变量加上前缀mutable 可以改动
+实例调用含const修饰的函数，本身必须也要用const修饰
+创建对象
+1.在栈上创建 能用这个就用这个
+2.在堆上 特殊情况，特殊要求     使用new    必须手动释放
+argv[0] 是程序的名称，
+argv[1] 到 argv[argc-1] 包含传递给程序的其他参数。
+基于范围的 for 循环（Range-based for loop）是一种简化遍历容器（如数组、向量、列表等）的语法
+for (元素类型 元素变量 : 容器) {
+// 使用元素变量
+}
+for(rclcpp::Parameter n : params){
+RCLCPP_INFO(this-&gt;get_logger(),“key = %s , value = %s”,n.get_name().c_str(),n.value_to_string().c_str());
+//判断是否含有
+  RCLCPP_INFO(this-&gt;get_logger(),&quot;是否包含%s? %d&quot;,n.get_name().c_str(),this-&gt;has_parameter(n.get_name()));
+
+&#125;
+
+std::to_string: 数字等转换成字符串
+cin.getline() :接收一个字符串，可以接收空格并输出
+1、cin.getline()实际上有三个参数，cin.getline(接收字符串的变量,接收字符个数,结束字符)
+2、当第三个参数省略时，系统默认为’\0’
+3、如果将例子中cin.getline()改为cin.getline(m,5,‘a’);当输入jlkjkljkl时输出jklj，输入jkaljkljkl时，输出jk
+#include 
+using namespace std;
+main ()
+{
+char m[20];
+cin.getline(m,5);
+cout&lt;&lt;m&lt;&lt;endl;
+}
+getline():接收一个字符串，可以接收空格并输出，需包含“#include”
+#include
+#include
+using namespace std;
+main ()
+{
+string str;
+getline(cin,str);
+cout&lt;&lt;str&lt;&lt;endl;
+}
+]]></content>
+      <tags>
+        <tag>Cpp</tag>
       </tags>
   </entry>
   <entry>
@@ -571,6 +571,163 @@ CMSIS中邮件队列
       </categories>
       <tags>
         <tag>FreeRTOS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ros2-base</title>
+    <url>/2025/ros2-base/</url>
+    <content><![CDATA[DDS
+DDS（Data Distribution Service）是一种基于数据的通信中间件标准，目的是建立分布式系统的高质量数据通信。它采用发布-订阅模型，通过主题（Topic）实现数据的逻辑分组和管理，支持灵活的数据传输策略。
+DDS的核心模型是DSCP（Data-centric Publish-Subscribe）模型，定义了数据发布者和数据订阅者之间的交互方式。具体包括以下几个角色：
+
+Domain：DDS域，可以理解为一个通讯平面，由Domain ID唯一标识，用于标识一个或多个DomainParticipant，只有在同个域的DomainParticipant才允许通讯
+DomainParticipant：域参与者，是域中的一个实体（可以具象为一个设备，或者设备中的一个进程），是数据发布者、订阅者和主题的创建和管理者，负责管理DDS中的实体对象和通信配置
+Publisher/Subscriber：发布者/订阅者，由DomainParticipant创建，发布者负责将数据发布到特定的主题（Topic）中，而订阅者则通过订阅相关主题来接收所需的数据
+DataWriter/DataReader：数据写入/读取者，由Publisher/Subscriber创建，DataWriter负责将数据写入到特定的主题中，而DataReader负责从主题中读取相应的数据
+Topic：主题是DCPS中定义数据传输的逻辑分类和组织单元。它可以看作是一种数据的标签，用于区分不同类型的数据
+
+这些角色之间的关系如下：
+Domain-&gt; DomainParticipant -&gt; Publisher/Subscriber -&gt; DataWriter/DataReader
+编程基础
+g++编译
+// 包含rclcpp头文件，如果Vscode显示红色的波浪线也没关系// 我们只是把VsCode当记事本而已，谁会在意记事本对代码的看法呢，不是吗？#include &quot;rclcpp/rclcpp.hpp&quot;int main(int argc, char **argv)&#123;    // 调用rclcpp的初始化函数    rclcpp::init(argc, argv);    // 调用rclcpp的循环运行我们创建的first_node节点    rclcpp::spin(std::make_shared&lt;rclcpp::Node&gt;(&quot;first_node&quot;));    return 0;&#125;
+g++ first_ros2_node.cpp
+报错：
+
+No such file or directory——没有那个文件或目录
+
+
+g++: error: first_ros2_node.cpp: 没有那个文件或目录
+g++: fatal error: no input files
+compilation terminated.
+
+解决：
+
+-I 添加头文件路径 套娃式，全部加入
+g++ first_ros2_node.cpp -I  /opt/ros/foxy/include/rclcpp/
+
+
+undefined reference to xxxxx
+g++找不到库文件
+
+解决：
+
+-L 添加库文件路径
+-lrclcpp -lrcutils  指定链接到 rclcpp rcutils库
+
+make
+cmake
+工作空间
+工作空间（Workspace）是一个目录结构，用于组织和管理多个ROS 2包。通常包括四个主要目录：
+
+src（包含所有源代码包。每个包是一个独立的目录，包含包的源代码、头文件、配置文件等）
+build（包含构建过程中生成的中间文件。这些文件在构建过程中由colcon工具生成，用于编译和链接。）
+install（包含构建完成后生成的可执行文件、库文件和配置文件。这些文件在构建完成后由colcon工具安装到此目录，用于运行和测试。）
+log（包含构建过程中的日志文件。这些文件记录了构建过程中的详细信息，方便调试和排查问题）
+
+新建一个工作空间：
+
+mkdir -p &lt;workspace_name&gt;/src
+cd &lt;workspace_name&gt;
+colcon build   //可以省略，构建包时一并进行
+cd &lt;workspace_name&gt;/src
+
+功能包
+功能包（Feature Package）是一个特殊的包(就等于包？)，它提供了一组相关的功能或服务，通常用于扩展ROS 2的核心功能。功能包可以包含节点、服务、消息、动作等，也可以提供工具、库或配置文件，以支持特定的功能或任务。
+ROS2中功能包根据编译方式的不同分为三种类型：
+
+ament_python，适用于python程序
+cmake，适用于C++
+ament_cmake，适用于C++程序,是cmake的增强版
+
+结构
+一个典型的ROS 2包通常包含以下文件和目录：
+
+epackage.xml
+这是包的描述文件，包含包的元数据，如包名、版本、作者、依赖关系等。它用于定义包的基本信息和依赖关系，帮助ROS 2构建系统（如colcon）了解如何构建和安装包。
+CMakeLists.txt
+这是包的构建脚本，使用CMake语法编写。它定义了如何构建包中的代码，包括编译源文件、链接库、生成可执行文件等。
+src目录
+包含源代码文件，如C++或Python文件。这些文件定义了包中的节点、库等。
+include目录
+包含头文件，这些头文件定义了包中的类、函数等。
+launch目录
+包含启动文件，这些文件定义了如何启动包中的节点。启动文件通常使用XML或Python编写。
+相关代码
+
+获取
+安装获取——sudo apt install ros-&lt;version代号&gt;-package_name
+也可手动编译获取（手动source工作空间的install目录 ）
+常用命令
+
+创建功能包
+
+ros2 pkg create &lt;package-name&gt;  --build-type  &#123;cmake,ament_cmake,ament_python&#125;  --dependencies &lt;依赖名字&gt; --node-name NAME  
+自动生成NAME.cpp源文件 注意别加后缀
+
+列出可执行文件
+
+ros2 pkg executables &lt;package_name&gt;ros2 pkg executables turtlesim
+
+列出所有的包
+
+ros2 pkg list 
+
+输出某个包所在路径前缀
+
+ros2 pkg prefix &lt;package_name&gt;
+
+列出包的清单描述文件
+
+ros2 pkg xml &lt;package_name&gt;
+节点
+节点可以理解为相互独立的进程。每一个节点只负责一个单独的模块化功能，比如一个节点负责控制车轮转动，一个节点负责从激光雷达获取数据、一个节点负责处理激光雷达的数据、一个节点负责定位等等
+相关命令
+
+启动包下的节点
+
+ros2 run &lt;package_name&gt; &lt;executable_name&gt;```  2. 查看节点列表```bashros2 node list   
+
+查看节点信息
+
+ros2 node info &lt;node_name&gt;        
+
+重映射节点名称
+
+ros2 run turtlesim turtlesim_node --ros-args --remap __node:=my_turtle    
+–ros-args  后面跟上相关参数
+
+运行节点时设置参数
+
+ros2 run example_parameters_rclcpp parameters_basic --ros-args -p rcl_log_level:=10
+Colcon
+功能包构建工具，可以用来编译代码
+相关代码
+
+允许通过更改src下的部分文件来改变install（重要）每次调整 python 脚本时都不必重新build了  ???
+
+colcon build --symlink-install     
+
+只编译一个包
+
+colcon biuld --packages-select YOUR_PKG_NAME           
+
+编译整个工程
+
+colcon build         
+
+不编译测试单元
+
+colcon build --packages-select YOUR_PKG_NAME --cmake-args -DBUILD_TESTING=0    
+
+运行编译的包的测试
+
+colcon test        
+一般流程
+建空间——建包——写源代码——修改CMakelists.txt——编译——加载setup.bash文件——执行
+]]></content>
+      <tags>
+        <tag>ros2</tag>
       </tags>
   </entry>
   <entry>

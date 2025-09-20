@@ -1,0 +1,669 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="HomesickAlien" />
+  <!-- Open Graph Description 简短摘要-->
+  
+  <!-- 用于搜索引擎的文章摘要 -->
+  
+  
+  
+  <title>
+    
+      ros2-base 
+      
+      
+      |
+    
+     Blogs
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <link rel="icon" href="/images/favicon.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img src="/images/avatar.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/">HomesickAlien</a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">Archives</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">ros2-base</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2025-09-20 13:46:24
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/ros2/" title="ros2">
+                    #ros2
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h2 id="DDS">DDS</h2>
+<p>DDS（Data Distribution Service）是一种基于数据的通信中间件标准，目的是建立分布式系统的高质量数据通信。它采用发布-订阅模型，通过主题（Topic）实现数据的逻辑分组和管理，支持灵活的数据传输策略。</p>
+<p>DDS的核心模型是DSCP（Data-centric Publish-Subscribe）模型，定义了数据发布者和数据订阅者之间的交互方式。具体包括以下几个角色：</p>
+<ul>
+<li>Domain：DDS域，可以理解为一个通讯平面，由Domain ID唯一标识，用于标识一个或多个DomainParticipant，只有在同个域的DomainParticipant才允许通讯</li>
+<li>DomainParticipant：域参与者，是域中的一个实体（可以具象为一个设备，或者设备中的一个进程），是数据发布者、订阅者和主题的创建和管理者，负责管理DDS中的实体对象和通信配置</li>
+<li>Publisher/Subscriber：发布者/订阅者，由DomainParticipant创建，发布者负责将数据发布到特定的主题（Topic）中，而订阅者则通过订阅相关主题来接收所需的数据</li>
+<li>DataWriter/DataReader：数据写入/读取者，由Publisher/Subscriber创建，DataWriter负责将数据写入到特定的主题中，而DataReader负责从主题中读取相应的数据</li>
+<li>Topic：主题是DCPS中定义数据传输的逻辑分类和组织单元。它可以看作是一种数据的标签，用于区分不同类型的数据</li>
+</ul>
+<p>这些角色之间的关系如下：<br>
+Domain-&gt; DomainParticipant -&gt; Publisher/Subscriber -&gt; DataWriter/DataReader</p>
+<h2 id="编程基础">编程基础</h2>
+<p>g++编译</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 包含rclcpp头文件，如果Vscode显示红色的波浪线也没关系</span></span><br><span class="line"><span class="comment">// 我们只是把VsCode当记事本而已，谁会在意记事本对代码的看法呢，不是吗？</span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;rclcpp/rclcpp.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> **argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">    <span class="comment">// 调用rclcpp的初始化函数</span></span><br><span class="line">    rclcpp::<span class="built_in">init</span>(argc, argv);</span><br><span class="line">    <span class="comment">// 调用rclcpp的循环运行我们创建的first_node节点</span></span><br><span class="line">    rclcpp::<span class="built_in">spin</span>(std::<span class="built_in">make_shared</span>&lt;rclcpp::Node&gt;(<span class="string">&quot;first_node&quot;</span>));</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>g++ first_ros2_node.cpp</code><br>
+报错：</p>
+<ol>
+<li>No such file or directory——没有那个文件或目录</li>
+</ol>
+<blockquote>
+<p>g++: error: first_ros2_node.cpp: 没有那个文件或目录<br>
+g++: fatal error: no input files<br>
+compilation terminated.</p>
+</blockquote>
+<p>解决：</p>
+<blockquote>
+<p>-I 添加头文件路径 套娃式，全部加入<br>
+g++ first_ros2_node.cpp -I  /opt/ros/foxy/include/rclcpp/</p>
+</blockquote>
+<ol start="2">
+<li>undefined reference to xxxxx<br>
+g++找不到库文件</li>
+</ol>
+<p>解决：</p>
+<blockquote>
+<p>-L 添加库文件路径<br>
+-lrclcpp -lrcutils  指定链接到 rclcpp rcutils库</p>
+</blockquote>
+<h2 id="make">make</h2>
+<h2 id="cmake">cmake</h2>
+<h2 id="工作空间">工作空间</h2>
+<p>工作空间（Workspace）是一个目录结构，用于组织和管理多个ROS 2包。通常包括四个主要目录：</p>
+<ul>
+<li>src（包含所有源代码包。每个包是一个独立的目录，包含包的源代码、头文件、配置文件等）</li>
+<li>build（包含构建过程中生成的中间文件。这些文件在构建过程中由colcon工具生成，用于编译和链接。）</li>
+<li>install（包含构建完成后生成的可执行文件、库文件和配置文件。这些文件在构建完成后由colcon工具安装到此目录，用于运行和测试。）</li>
+<li>log（包含构建过程中的日志文件。这些文件记录了构建过程中的详细信息，方便调试和排查问题）</li>
+</ul>
+<p>新建一个工作空间：</p>
+<ul>
+<li>mkdir -p &lt;workspace_name&gt;/src</li>
+<li>cd &lt;workspace_name&gt;</li>
+<li>colcon build   //可以省略，构建包时一并进行</li>
+<li>cd &lt;workspace_name&gt;/src</li>
+</ul>
+<h2 id="功能包">功能包</h2>
+<p>功能包（Feature Package）是一个特殊的包(就等于包？)，它提供了一组相关的功能或服务，通常用于扩展ROS 2的核心功能。功能包可以包含节点、服务、消息、动作等，也可以提供工具、库或配置文件，以支持特定的功能或任务。</p>
+<p>ROS2中功能包根据编译方式的不同分为三种类型：</p>
+<ul>
+<li>ament_python，适用于python程序</li>
+<li>cmake，适用于C++</li>
+<li>ament_cmake，适用于C++程序,是cmake的增强版</li>
+</ul>
+<h3 id="结构">结构</h3>
+<p>一个典型的ROS 2包通常包含以下文件和目录：</p>
+<ol>
+<li>epackage.xml<br>
+这是包的描述文件，包含包的元数据，如包名、版本、作者、依赖关系等。它用于定义包的基本信息和依赖关系，帮助ROS 2构建系统（如colcon）了解如何构建和安装包。</li>
+<li>CMakeLists.txt<br>
+这是包的构建脚本，使用CMake语法编写。它定义了如何构建包中的代码，包括编译源文件、链接库、生成可执行文件等。</li>
+<li>src目录<br>
+包含源代码文件，如C++或Python文件。这些文件定义了包中的节点、库等。</li>
+<li>include目录<br>
+包含头文件，这些头文件定义了包中的类、函数等。</li>
+<li>launch目录<br>
+包含启动文件，这些文件定义了如何启动包中的节点。启动文件通常使用XML或Python编写。<br>
+相关代码</li>
+</ol>
+<h3 id="获取">获取</h3>
+<p>安装获取——sudo apt install ros-&lt;version代号&gt;-package_name<br>
+也可手动编译获取（手动source工作空间的install目录 ）</p>
+<h3 id="常用命令">常用命令</h3>
+<ol>
+<li>创建功能包</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros2 pkg create &lt;package-name&gt;  --build-type  &#123;cmake,ament_cmake,ament_python&#125;  --dependencies &lt;依赖名字&gt; --node-name NAME  </span><br></pre></td></tr></table></figure>
+<p>自动生成NAME.cpp源文件 注意别加后缀</p>
+<ol start="2">
+<li>列出可执行文件</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">ros2 pkg executables &lt;package_name&gt;</span><br><span class="line">ros2 pkg executables turtlesim</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>列出所有的包</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros2 pkg list </span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>输出某个包所在路径前缀</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros2 pkg prefix &lt;package_name&gt;</span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>列出包的清单描述文件</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros2 pkg xml &lt;package_name&gt;</span><br></pre></td></tr></table></figure>
+<h2 id="节点">节点</h2>
+<p>节点可以理解为相互独立的进程。每一个节点只负责一个单独的模块化功能，比如一个节点负责控制车轮转动，一个节点负责从激光雷达获取数据、一个节点负责处理激光雷达的数据、一个节点负责定位等等</p>
+<h3 id="相关命令">相关命令</h3>
+<ol>
+<li>启动包下的节点</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">ros2 run &lt;package_name&gt; &lt;executable_name&gt;</span><br><span class="line">```  </span><br><span class="line">2. 查看节点列表</span><br><span class="line">```bash</span><br><span class="line">ros2 node list   </span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>查看节点信息</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros2 node info &lt;node_name&gt;        </span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>重映射节点名称</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros2 run turtlesim turtlesim_node --ros-args --remap __node:=my_turtle    </span><br></pre></td></tr></table></figure>
+<p>–ros-args  后面跟上相关参数</p>
+<ol start="5">
+<li>运行节点时设置参数</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ros2 run example_parameters_rclcpp parameters_basic --ros-args -p rcl_log_level:=10</span><br></pre></td></tr></table></figure>
+<h2 id="Colcon">Colcon</h2>
+<p>功能包构建工具，可以用来编译代码</p>
+<h3 id="相关代码">相关代码</h3>
+<ol>
+<li>允许通过更改src下的部分文件来改变install（重要）每次调整 python 脚本时都不必重新build了  ???</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">colcon build --symlink-install     </span><br></pre></td></tr></table></figure>
+<ol start="2">
+<li>只编译一个包</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">colcon biuld --packages-select YOUR_PKG_NAME           </span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>编译整个工程</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">colcon build         </span><br></pre></td></tr></table></figure>
+<ol start="4">
+<li>不编译测试单元</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">colcon build --packages-select YOUR_PKG_NAME --cmake-args -DBUILD_TESTING=0    </span><br></pre></td></tr></table></figure>
+<ol start="5">
+<li>运行编译的包的测试</li>
+</ol>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">colcon <span class="built_in">test</span>        </span><br></pre></td></tr></table></figure>
+<h2 id="一般流程">一般流程</h2>
+<p>建空间——建包——写源代码——修改CMakelists.txt——编译——加载setup.bash文件——执行</p>
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/2025/pi5-ImmortalWrt/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2025-09-20 13:46:24
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/ros2/" title="ros2">
+                        #ros2
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#DDS"><span class="toc-text">DDS</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BC%96%E7%A8%8B%E5%9F%BA%E7%A1%80"><span class="toc-text">编程基础</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#make"><span class="toc-text">make</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#cmake"><span class="toc-text">cmake</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B7%A5%E4%BD%9C%E7%A9%BA%E9%97%B4"><span class="toc-text">工作空间</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%9F%E8%83%BD%E5%8C%85"><span class="toc-text">功能包</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%8E%B7%E5%8F%96"><span class="toc-text">获取</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4"><span class="toc-text">常用命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%8A%82%E7%82%B9"><span class="toc-text">节点</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E5%91%BD%E4%BB%A4"><span class="toc-text">相关命令</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Colcon"><span class="toc-text">Colcon</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%9B%B8%E5%85%B3%E4%BB%A3%E7%A0%81"><span class="toc-text">相关代码</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E4%B8%80%E8%88%AC%E6%B5%81%E7%A8%8B"><span class="toc-text">一般流程</span></a></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          
+              <a title="github" target="_blank" rel="noopener" href="https://github.com/Choosen123">
+                <i class="iconfont icon-github"></i>
+              </a>
+              
+        </li>
+        
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Copyright © 2025 Oranges</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+</div>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="搜索...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + ros2-base + '&url=' + https%3A%2F%2Fchoosen123.github.io%2F2025%2Fros2-base%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://choosen123.github.io/2025/ros2-base/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
+  
+  
+<script src="/js/shares.js"></script>
+
+
+
+      </div>
+    </div>
+  </body>
+</html>
