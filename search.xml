@@ -1,6 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <search>
   <entry>
+    <title>Cpp-basic</title>
+    <url>/2025/Cpp-basic/</url>
+    <content><![CDATA[static
+静态方法不能引用非静态变量
+非静态成员变量是对象的一部分，每个对象的非静态成员变量都有独立的存储空间。而静态成员函数属于类，与具体的对象无关。
+//每个非静态方法总是获得当前类的一个实例做参数
+枚举enum
+enum name : unsigned char   //指定类型 &#123;A=2,B=4,C=7      //&#125;name c = A;
+构造函数——每次构造类实例时，自动执行的函数
+class Entity&#123;    public:    float X,Y;Entity()&#123;&#125;Entity(float x,float y)&#123;      //带参数的构造函数，使用时构造带参实例    Entity e(1.0,2.3)    X=x;    Y=y;&#125;&#125;
+存在一个默认构造函数，但啥也没干
+Log类默认构造函数被删除（delete），因此无法构造实例
+初始化列表是C++中用于在构造函数中初始化类成员变量的一种语法结构。它提供了一种高效且简洁的方式来初始化成员变量，尤其是在处理类的继承和资源管理时非常有用。下面将详细介绍初始化列表的语法、用途和一些最佳实践。
+初始化列表的语法初始化列表位于构造函数的参数列表之后，使用冒号：分隔，后面跟着一个用逗号分隔的成员变量初始化列表。基本语法如下：
+ClassName(ConstructorParameters) : Member1(Initializer1), Member2(Initializer2), ... &#123;    // 构造函数体&#125;class Player &#123;public:    // 构造函数    Player(const std::string&amp; name, int age) : m_Name(name), m_Age(age) &#123;        // 构造函数体可以为空，因为所有初始化工作都在初始化列表中完成了    &#125;    // 成员函数    void DisplayInfo() const &#123;        std::cout &lt;&lt; &quot;Player Name: &quot; &lt;&lt; m_Name &lt;&lt; &quot;, Age: &quot; &lt;&lt; m_Age &lt;&lt; std::endl;    &#125;private:    std::string m_Name;  // 成员变量    int m_Age;           // 成员变量&#125;;
+使用初始化列表可避免创建两个实例
+析构函数——实例删除时执行
+~Entity(){
+}
+继承——子类包含父类的所有
+
+public
+：公有继承。基类的公有成员和保护成员在派生类中仍然是公有成员和保护成员，可以被派生类的成员函数以及派生类对象直接访问。
+protected
+：保护继承。基类的公有成员和保护成员在派生类中成为保护成员，可以被派生类的成员函数访问，但不能被派生类对象直接访问。
+private
+：私有继承。基类的公有成员和保护成员在派生类中成为私有成员，只能被派生类的成员函数访问，派生类对象和其他函数都无法直接访问。
+
+Entity* e = new Entity();
+使用new运算符在堆（heap）上创建了一个Entity类的实例，并将该实例的地址赋值给指针变量e
+
+new是C++中的一个运算符，用于在堆上动态分配内存并构造对象。
+使用 new 分配的内存必须使用 delete 释放，否则会导致内存泄漏
+ClassName* pointer = new ClassName(parameters);
+虚函数
+
+输出：全为Entity类的GetName
+C++会在Entity内部找GetName()而不是用户希望的Player内部
+解决：基类中加上virtual，子类中加override
+纯虚函数——virtual … = 0;
+具有纯虚函数的类无法实例，其子类也必须在自身或者更上级实现纯虚函数覆写之后才能实例。
+可以定义一个基类，内部写入纯虚函数，其子类可以各自覆写，然后将抽象基类作为参数（如指针）放入一个通用的函数中
+子类必须实现，否则无法实例化
+C++可见性：
+private：只有类自身和友元可以访问，子类也不行
+protected：类自身，子类，外部不可见
+public：都可以
+std::string
+cout 字符串要包括 
+双引号内是const char 数组
+std::string name = std ::string(“Cherno”) + “hello!”;
+name.find(“”)
+字符串作为函数参数输入，尽量const std::string &amp; string，避免复制
+字符串字面量
+char* name = “Cherno”;
+const cahr* name = “Cherno”
+储存在const区，修改是未定义的
+wchar_t—L char16_t—u char32_t—U
+类中的const
+不能改变类中变量值，只能读取
+变量加上前缀mutable 可以改动
+实例调用含const修饰的函数，本身必须也要用const修饰
+创建对象
+1.在栈上创建 能用这个就用这个
+2.在堆上 特殊情况，特殊要求     使用new    必须手动释放
+argv[0] 是程序的名称，
+argv[1] 到 argv[argc-1] 包含传递给程序的其他参数。
+基于范围的 for 循环（Range-based for loop）是一种简化遍历容器（如数组、向量、列表等）的语法
+for (元素类型 元素变量 : 容器) {
+// 使用元素变量
+}
+for(rclcpp::Parameter n : params){
+RCLCPP_INFO(this-&gt;get_logger(),“key = %s , value = %s”,n.get_name().c_str(),n.value_to_string().c_str());
+//判断是否含有
+  RCLCPP_INFO(this-&gt;get_logger(),&quot;是否包含%s? %d&quot;,n.get_name().c_str(),this-&gt;has_parameter(n.get_name()));
+
+&#125;
+
+std::to_string: 数字等转换成字符串
+cin.getline() :接收一个字符串，可以接收空格并输出
+1、cin.getline()实际上有三个参数，cin.getline(接收字符串的变量,接收字符个数,结束字符)
+2、当第三个参数省略时，系统默认为’\0’
+3、如果将例子中cin.getline()改为cin.getline(m,5,‘a’);当输入jlkjkljkl时输出jklj，输入jkaljkljkl时，输出jk
+#include 
+using namespace std;
+main ()
+{
+char m[20];
+cin.getline(m,5);
+cout&lt;&lt;m&lt;&lt;endl;
+}
+getline():接收一个字符串，可以接收空格并输出，需包含“#include”
+#include
+#include
+using namespace std;
+main ()
+{
+string str;
+getline(cin,str);
+cout&lt;&lt;str&lt;&lt;endl;
+}
+]]></content>
+      <tags>
+        <tag>Cpp</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>Semaphore-and-Mutex</title>
     <url>/2025/Semaphore-and-Mutex/</url>
     <content><![CDATA[数据的同步机制
@@ -108,113 +215,6 @@ taskENTER_CRITICAL()宏定义会关闭所有中断包括内核切换所在的中
 ]]></content>
       <tags>
         <tag>FreeRTOS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>Cpp-basic</title>
-    <url>/2025/Cpp-basic/</url>
-    <content><![CDATA[static
-静态方法不能引用非静态变量
-非静态成员变量是对象的一部分，每个对象的非静态成员变量都有独立的存储空间。而静态成员函数属于类，与具体的对象无关。
-//每个非静态方法总是获得当前类的一个实例做参数
-枚举enum
-enum name : unsigned char   //指定类型 &#123;A=2,B=4,C=7      //&#125;name c = A;
-构造函数——每次构造类实例时，自动执行的函数
-class Entity&#123;    public:    float X,Y;Entity()&#123;&#125;Entity(float x,float y)&#123;      //带参数的构造函数，使用时构造带参实例    Entity e(1.0,2.3)    X=x;    Y=y;&#125;&#125;
-存在一个默认构造函数，但啥也没干
-Log类默认构造函数被删除（delete），因此无法构造实例
-初始化列表是C++中用于在构造函数中初始化类成员变量的一种语法结构。它提供了一种高效且简洁的方式来初始化成员变量，尤其是在处理类的继承和资源管理时非常有用。下面将详细介绍初始化列表的语法、用途和一些最佳实践。
-初始化列表的语法初始化列表位于构造函数的参数列表之后，使用冒号：分隔，后面跟着一个用逗号分隔的成员变量初始化列表。基本语法如下：
-ClassName(ConstructorParameters) : Member1(Initializer1), Member2(Initializer2), ... &#123;    // 构造函数体&#125;class Player &#123;public:    // 构造函数    Player(const std::string&amp; name, int age) : m_Name(name), m_Age(age) &#123;        // 构造函数体可以为空，因为所有初始化工作都在初始化列表中完成了    &#125;    // 成员函数    void DisplayInfo() const &#123;        std::cout &lt;&lt; &quot;Player Name: &quot; &lt;&lt; m_Name &lt;&lt; &quot;, Age: &quot; &lt;&lt; m_Age &lt;&lt; std::endl;    &#125;private:    std::string m_Name;  // 成员变量    int m_Age;           // 成员变量&#125;;
-使用初始化列表可避免创建两个实例
-析构函数——实例删除时执行
-~Entity(){
-}
-继承——子类包含父类的所有
-
-public
-：公有继承。基类的公有成员和保护成员在派生类中仍然是公有成员和保护成员，可以被派生类的成员函数以及派生类对象直接访问。
-protected
-：保护继承。基类的公有成员和保护成员在派生类中成为保护成员，可以被派生类的成员函数访问，但不能被派生类对象直接访问。
-private
-：私有继承。基类的公有成员和保护成员在派生类中成为私有成员，只能被派生类的成员函数访问，派生类对象和其他函数都无法直接访问。
-
-Entity* e = new Entity();
-使用new运算符在堆（heap）上创建了一个Entity类的实例，并将该实例的地址赋值给指针变量e
-
-new是C++中的一个运算符，用于在堆上动态分配内存并构造对象。
-使用 new 分配的内存必须使用 delete 释放，否则会导致内存泄漏
-ClassName* pointer = new ClassName(parameters);
-虚函数
-
-输出：全为Entity类的GetName
-C++会在Entity内部找GetName()而不是用户希望的Player内部
-解决：基类中加上virtual，子类中加override
-纯虚函数——virtual … = 0;
-具有纯虚函数的类无法实例，其子类也必须在自身或者更上级实现纯虚函数覆写之后才能实例。
-可以定义一个基类，内部写入纯虚函数，其子类可以各自覆写，然后将抽象基类作为参数（如指针）放入一个通用的函数中
-子类必须实现，否则无法实例化
-C++可见性：
-private：只有类自身和友元可以访问，子类也不行
-protected：类自身，子类，外部不可见
-public：都可以
-std::string
-cout 字符串要包括 
-双引号内是const char 数组
-std::string name = std ::string(“Cherno”) + “hello!”;
-name.find(“”)
-字符串作为函数参数输入，尽量const std::string &amp; string，避免复制
-字符串字面量
-char* name = “Cherno”;
-const cahr* name = “Cherno”
-储存在const区，修改是未定义的
-wchar_t—L char16_t—u char32_t—U
-类中的const
-不能改变类中变量值，只能读取
-变量加上前缀mutable 可以改动
-实例调用含const修饰的函数，本身必须也要用const修饰
-创建对象
-1.在栈上创建 能用这个就用这个
-2.在堆上 特殊情况，特殊要求     使用new    必须手动释放
-argv[0] 是程序的名称，
-argv[1] 到 argv[argc-1] 包含传递给程序的其他参数。
-基于范围的 for 循环（Range-based for loop）是一种简化遍历容器（如数组、向量、列表等）的语法
-for (元素类型 元素变量 : 容器) {
-// 使用元素变量
-}
-for(rclcpp::Parameter n : params){
-RCLCPP_INFO(this-&gt;get_logger(),“key = %s , value = %s”,n.get_name().c_str(),n.value_to_string().c_str());
-//判断是否含有
-  RCLCPP_INFO(this-&gt;get_logger(),&quot;是否包含%s? %d&quot;,n.get_name().c_str(),this-&gt;has_parameter(n.get_name()));
-
-&#125;
-
-std::to_string: 数字等转换成字符串
-cin.getline() :接收一个字符串，可以接收空格并输出
-1、cin.getline()实际上有三个参数，cin.getline(接收字符串的变量,接收字符个数,结束字符)
-2、当第三个参数省略时，系统默认为’\0’
-3、如果将例子中cin.getline()改为cin.getline(m,5,‘a’);当输入jlkjkljkl时输出jklj，输入jkaljkljkl时，输出jk
-#include 
-using namespace std;
-main ()
-{
-char m[20];
-cin.getline(m,5);
-cout&lt;&lt;m&lt;&lt;endl;
-}
-getline():接收一个字符串，可以接收空格并输出，需包含“#include”
-#include
-#include
-using namespace std;
-main ()
-{
-string str;
-getline(cin,str);
-cout&lt;&lt;str&lt;&lt;endl;
-}
-]]></content>
-      <tags>
-        <tag>Cpp</tag>
       </tags>
   </entry>
   <entry>
