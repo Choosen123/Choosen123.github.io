@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="zh-CN" color-mode="light">
+
+  <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="author" content="HomesickAlien" />
+  <!-- Open Graph Description 简短摘要-->
+  
+  <!-- 用于搜索引擎的文章摘要 -->
+  
+  
+  
+  <title>
+    
+      ros2-communication 
+      
+      
+      |
+    
+     Blogs
+  </title>
+
+  
+    <link rel="apple-touch-icon" href="/images/favicon.png">
+    <link rel="icon" href="/images/favicon.png">
+  
+
+  <!-- Raleway-Font -->
+  <link href="https://fonts.googleapis.com/css?family=Raleway&display=swap" rel="stylesheet">
+
+  <!-- hexo site css -->
+  <link rel="stylesheet" href="/css/main.css" />
+  <link rel="stylesheet" href="//at.alicdn.com/t/font_1886449_67xjft27j1l.css" />
+  <!-- 代码块风格 -->
+  
+
+  <!-- jquery3.3.1 -->
+  
+    <script defer type="text/javascript" src="/plugins/jquery.min.js"></script>
+  
+
+  <!-- fancybox -->
+  
+    <link href="/plugins/jquery.fancybox.min.css" rel="stylesheet">
+    <script defer type="text/javascript" src="/plugins/jquery.fancybox.min.js"></script>
+  
+  
+<script src="/js/fancybox.js"></script>
+
+
+  
+
+  
+
+  <script>
+    var html = document.documentElement
+    const colorMode = localStorage.getItem('color-mode')
+    if (colorMode) {
+      document.documentElement.setAttribute('color-mode', colorMode)
+    }
+  </script>
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+
+  <body>
+    <div id="app">
+      <div class="header">
+  <div class="avatar">
+    <a href="/">
+      <!-- 头像取消懒加载，添加no-lazy -->
+      
+        <img src="/images/avatar.png" alt="">
+      
+    </a>
+    <div class="nickname"><a href="/">HomesickAlien</a></div>
+  </div>
+  <div class="navbar">
+    <ul>
+      
+        <li class="nav-item" data-path="/">
+          <a href="/">Home</a>
+        </li>
+      
+        <li class="nav-item" data-path="/archives/">
+          <a href="/archives/">Archives</a>
+        </li>
+      
+        <li class="nav-item" data-path="/tags/">
+          <a href="/tags/">Tags</a>
+        </li>
+      
+    </ul>
+  </div>
+</div>
+
+
+<script src="/js/activeNav.js"></script>
+
+
+
+      <div class="flex-container">
+        <!-- 文章详情页，展示文章具体内容，url形式：https://yoursite/文章标题/ -->
+<!-- 同时为「标签tag」，「朋友friend」，「分类categories」，「关于about」页面的承载页面，具体展示取决于page.type -->
+
+
+  <!-- LaTex Display -->
+
+  
+    <script async type="text/javascript" src="/plugins/mathjax/tex-chtml.js"></script>
+  
+  <script>
+    MathJax = {
+      tex: {
+        inlineMath: [['$', '$'], ['\\(', '\\)']]
+      }
+    }
+  </script>
+
+
+
+
+
+  <!-- clipboard -->
+
+  
+    <script async type="text/javascript" src="/plugins/clipboard.min.js"></script>
+  
+  
+<script src="/js/codeCopy.js"></script>
+
+
+
+
+
+
+
+  
+
+  
+
+  
+
+  
+  <!-- 文章内容页 url形式：https://yoursite/文章标题/ -->
+  <div class="container post-details" id="post-details">
+    <div class="post-content">
+      <div class="post-title">ros2-communication</div>
+      <div class="post-attach">
+        <span class="post-pubtime">
+          <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+          2025-09-20 22:21:44
+        </span>
+        
+              <span class="post-tags">
+                <i class="iconfont icon-tags mr-10" title="标签"></i>
+                
+                <span class="span--tag mr-8">
+                  <a href="/tags/ros2/" title="ros2">
+                    #ros2
+                  </a>
+                </span>
+                
+              </span>
+          
+      </div>
+      <div class="markdown-body">
+        <h2 id="接口">接口</h2>
+<p>接口：通信时使用的数据载体（特定的格式），由接口文件定义</p>
+<ol>
+<li>msg文件：用于话题通信，</li>
+<li>srv文件：用于服务通信</li>
+<li>action文件：用于动作通信</li>
+</ol>
+<p>参数通信不使用，操作参数对象</p>
+<h2 id="interface"><img src="/2025/ros2-communication/interface.png" alt="interface" loading="lazy"></h2>
+<h2 id="话题通信：">话题通信：</h2>
+<p>基于发布订阅模式<br>
+除了一个节点发布，一个节点接受的形式外，ROS2话题通信其实还可以是1对n, n对1, n对n的，1对n</p>
+<hr>
+<h3 id="发布者：">发布者：</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&quot;std_msgs/msg/string.hpp&quot;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std::chrono_literals;<span class="comment">//1s 代表一秒 std::chrono::seconds(1)</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Talker</span> :<span class="keyword">public</span> rclcpp::Node&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">//将节点命名为talker,初始化count</span></span><br><span class="line">  <span class="built_in">Talker</span>() :<span class="built_in">Node</span>(<span class="string">&quot;talker&quot;</span>),<span class="built_in">count</span>(<span class="number">0</span>))&#123;</span><br><span class="line">    <span class="comment">//打印日志，说明节点被创建</span></span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;a talker created&quot;</span>);</span><br><span class="line">    <span class="comment">//创建一个发布者  话题为chat   队列长为10</span></span><br><span class="line">    publisher_ = <span class="keyword">this</span>-&gt;<span class="built_in">create_publisher</span>&lt;std_msgs::msg::String&gt;(<span class="string">&quot;chat&quot;</span>,<span class="number">10</span>);</span><br><span class="line">    <span class="comment">//创建一个每隔1秒触发一次的定时器，并将定时器的回调函数设置为当前对象的on_timer成员函数</span></span><br><span class="line">    timer_ =  <span class="keyword">this</span>-&gt;<span class="built_in">create_wall_timer</span>(<span class="number">1</span>s,std::<span class="built_in">bind</span>(&amp;Talker::on_timer,<span class="keyword">this</span>));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  <span class="comment">//创建一个定时器的指针</span></span><br><span class="line">  rclcpp::TimerBase::SharedPtr timer_ ;</span><br><span class="line">  </span><br><span class="line">  <span class="comment">//创建一个发布string类型数据的成员指针</span></span><br><span class="line">  rclcpp::Publisher&lt;std_msgs::msg::String&gt;::SharedPtr publisher_;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//无符号长整型</span></span><br><span class="line">  <span class="type">size_t</span> count;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">on_timer</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="comment">//创建一个String类的实例</span></span><br><span class="line">    <span class="comment">//局部变量！！！！每次创建一个新的，函数结束后销毁，不会资源浪费</span></span><br><span class="line">    <span class="comment">//也可以在函数外部预定义</span></span><br><span class="line">    <span class="keyword">auto</span> message = std_msgs::msg::<span class="built_in">String</span>();</span><br><span class="line">    <span class="comment">//to_string 转化成字符串</span></span><br><span class="line">    message.data = <span class="string">&quot;hello world!&quot;</span> + std::<span class="built_in">to_string</span>(count++);</span><br><span class="line">    <span class="comment">//</span></span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;发布者发布消息：%s&quot;</span>,message.data.<span class="built_in">c_str</span>());</span><br><span class="line">    <span class="comment">//publish：这是rclcpp::Publisher类的一个成员函数，用于发布消息。</span></span><br><span class="line">    <span class="comment">//这个函数接受一个消息对象作为参数，并将其发送到指定的主题上。</span></span><br><span class="line">    publisher_-&gt;<span class="built_in">publish</span>(message);</span><br><span class="line"></span><br><span class="line">  &#125; </span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span> ** argv)</span></span></span><br><span class="line"><span class="function"></span>&#123;</span><br><span class="line">  <span class="comment">//初始化rcl客户端</span></span><br><span class="line">  rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line"></span><br><span class="line">  <span class="comment">//回旋，一直执行回调函数，直到节点被关闭</span></span><br><span class="line">  <span class="comment">//std::make_shared&lt;T&gt;() 是一个模板函数，用于创建一个std::shared_ptr&lt;T&gt;对象。它不仅创建了一个共享指针，还同时创建了一个T类型的对象实例。</span></span><br><span class="line">  rclcpp::<span class="built_in">spin</span>(std::<span class="built_in">make_shared</span>&lt;Talker&gt;());</span><br><span class="line"></span><br><span class="line">  <span class="comment">//释放资源</span></span><br><span class="line">  rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="订阅方">订阅方</h3>
+<p><img src="/2025/ros2-communication/topic-subscriber.png" alt="tpic-subscriber" loading="lazy"></p>
+<p>回调函数传入参数类型不能是std_msgs::msg::String的引用<br>
+create_subscription方法传递的是消息的共享指针，而不是消息的引用。正确的参数类型应该是const std_msgs::msg::String::SharedPtr</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;std_msgs/msg/string.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">Listener</span> : <span class="keyword">public</span> rclcpp::Node&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">Listener</span>() : <span class="built_in">Node</span>(<span class="string">&quot;listener_node_cpp&quot;</span>)&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;订阅者已创建&quot;</span>);</span><br><span class="line">        <span class="comment">//接收到信息就执行回调函数</span></span><br><span class="line">        <span class="comment">//create_subscription函数的作用是创建一个订阅者（subscriber），该订阅者会监听指定主题（topic）上的消息。</span></span><br><span class="line">        <span class="comment">//当有消息发布到该主题时，create_subscription会将接收到的消息传递给指定的回调函数（callback function）。</span></span><br><span class="line">        subscription_ = <span class="keyword">this</span>-&gt;<span class="built_in">create_subscription</span>&lt;std_msgs::msg::String&gt;(<span class="string">&quot;chat&quot;</span>,<span class="number">10</span>,std::<span class="built_in">bind</span>(&amp;Listener::do_cb,<span class="keyword">this</span>,std::placeholders::_1));</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    <span class="comment">//注意传入消息类型</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">do_cb</span><span class="params">(<span class="type">const</span> std_msgs::msg::String::SharedPtr message)</span></span>&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;订阅到的消息是：%s&quot;</span>,message-&gt;data.<span class="built_in">c_str</span>());</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    rclcpp::Subscription&lt;std_msgs::msg::String&gt;::SharedPtr subscription_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc, <span class="type">char</span>** argv)</span></span>&#123;</span><br><span class="line">    rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line">    rclcpp::<span class="built_in">spin</span>(std::<span class="built_in">make_shared</span>&lt;Listener&gt;());</span><br><span class="line">    rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<p>生成代码片段<br>
+左下角设置——代码片段——cpp</p>
+<hr>
+<h3 id="自定义接口文件——编译前保存！！！！">自定义接口文件——编译前保存！！！！</h3>
+<p>文件名首字母大写</p>
+<h4 id="xml文件配置">xml文件配置</h4>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- 编译依赖--&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">build_depend</span>&gt;</span><span class="tag">&lt;/<span class="name">build_depend</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">&lt;!--执行依赖 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">exec_depend</span>&gt;</span><span class="tag">&lt;/<span class="name">exec_depend</span>&gt;</span></span><br><span class="line">  </span><br><span class="line">  <span class="comment">&lt;!--声明当前包所属功能包组 --&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">member_of_group</span>&gt;</span><span class="tag">&lt;/<span class="name">member_of_group</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p><code>ros2 pkg list | grep -i NAME</code>         筛选出来，不用记</p>
+<hr>
+<h4 id="CMakeLists-txt">CMakeLists.txt</h4>
+<figure class="highlight cmake"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">find_package</span>(rosidl_default_generators REQUIRED)</span><br><span class="line"></span><br><span class="line">rosidl_generate_interfaces(</span><br><span class="line">  <span class="variable">$&#123;PROJECT_NAME&#125;</span></span><br><span class="line">  <span class="string">&quot;msg/Student.msg&quot;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+<hr>
+<p>使用自定义接口文件要包含路径</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;base_interfaces_demo/msg/student.hpp&gt;</span></span></span><br><span class="line">    </span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std::chrono_literals;<span class="comment">//1s 代表一秒 std::chrono::seconds(1)</span></span><br><span class="line"><span class="keyword">using</span> base_interfaces_demo::msg::Student;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">TalkerStu</span> :<span class="keyword">public</span> rclcpp::Node&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">TalkerStu</span>() :<span class="built_in">Node</span>(<span class="string">&quot;talker_stu&quot;</span>)&#123;</span><br><span class="line">        publisher_ = <span class="keyword">this</span>-&gt;<span class="built_in">create_publisher</span>&lt;Student&gt;(<span class="string">&quot;Student&quot;</span>,<span class="number">10</span>);</span><br><span class="line">        timer_ = <span class="keyword">this</span>-&gt;<span class="built_in">create_wall_timer</span>(<span class="number">1</span>s,std::<span class="built_in">bind</span>(&amp;TalkerStu::callback,<span class="keyword">this</span>));</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    rclcpp::Publisher&lt;Student&gt;::SharedPtr publisher_; </span><br><span class="line">    rclcpp::TimerBase::SharedPtr timer_;</span><br><span class="line">    Student stu;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">callback</span><span class="params">()</span></span>&#123;</span><br><span class="line">        stu.name  = <span class="string">&quot;lihua&quot;</span>;</span><br><span class="line">        stu.age = <span class="number">12</span>;</span><br><span class="line">        stu.height = <span class="number">180.0</span>;</span><br><span class="line"></span><br><span class="line">        publisher_-&gt;<span class="built_in">publish</span>(stu);</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;发布消息：%s,%d,%lf&quot;</span>,stu.name.<span class="built_in">c_str</span>(),stu.age,stu.height);</span><br><span class="line">    &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> **argv)</span></span>&#123;</span><br><span class="line">    rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line">    rclcpp::<span class="built_in">spin</span>(std::<span class="built_in">make_shared</span>&lt;TalkerStu&gt;());</span><br><span class="line">    rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;base_interfaces_demo/msg/student.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> base_interfaces_demo::msg::Student;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std::chrono_literals;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ListenerStu</span> :<span class="keyword">public</span> rclcpp::Node&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">ListenerStu</span>() :<span class="built_in">Node</span>(<span class="string">&quot;listener_stu&quot;</span>)&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;订阅者已创建&quot;</span>);</span><br><span class="line">        subscription_ = <span class="keyword">this</span>-&gt;<span class="built_in">create_subscription</span>&lt;Student&gt;(<span class="string">&quot;Student&quot;</span>,<span class="number">10</span>,std::<span class="built_in">bind</span>(&amp;ListenerStu::callback,<span class="keyword">this</span>,std::placeholders::_1));</span><br><span class="line">    </span><br><span class="line">   &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    rclcpp::Subscription&lt;Student&gt;::SharedPtr subscription_;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">callback</span><span class="params">(<span class="type">const</span> Student::SharedPtr message)</span></span>&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;订阅者已接收：%s,%d,%lf&quot;</span>,message-&gt;name.<span class="built_in">c_str</span>(),message-&gt;age,message-&gt;height);</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> **argv)</span></span>&#123;</span><br><span class="line">    rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line">    </span><br><span class="line">    </span><br><span class="line">    rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="服务通信">服务通信</h2>
+<p>一对多，一个服务端，多个客户端</p>
+<h3 id="自定义接口文件">自定义接口文件</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">请求数据  </span><br><span class="line">---  </span><br><span class="line">响应数据  </span><br></pre></td></tr></table></figure>
+<p>在之前的基础上，修改CMakeLists.txt  ——rosidl_generate_interfaces即可</p>
+<h3 id="服务端">服务端</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;base_interfaces_demo/srv/addints.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> base_interfaces_demo::srv::Addints;</span><br><span class="line"><span class="keyword">using</span> std::placeholders::_1;</span><br><span class="line"><span class="keyword">using</span> std::placeholders::_2;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AddIntServer</span> :<span class="keyword">public</span> rclcpp::Node&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">AddIntServer</span>() :<span class="built_in">Node</span>(<span class="string">&quot;add_int_server&quot;</span>)&#123;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;服务端节点创建成功&quot;</span>);  </span><br><span class="line">    service_ = <span class="keyword">this</span>-&gt;<span class="built_in">create_service</span>&lt;Addints&gt;(<span class="string">&quot;add_ints&quot;</span>,std::<span class="built_in">bind</span>(&amp;AddIntServer::sum,<span class="keyword">this</span>,_1,_2));</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  rclcpp::Service&lt;Addints&gt;::SharedPtr service_;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">sum</span><span class="params">(<span class="type">const</span> Addints::Request::SharedPtr req,<span class="type">const</span> Addints::Response::SharedPtr res)</span></span>&#123;</span><br><span class="line">    res-&gt;sum = req-&gt;num1 + req-&gt;num2;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;%d + %d = %d&quot;</span>,req-&gt;num1,req-&gt;num2,res-&gt;sum);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> **argv)</span></span>&#123;</span><br><span class="line">  rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line">  </span><br><span class="line">  rclcpp::<span class="built_in">spin</span>(std::<span class="built_in">make_shared</span>&lt;AddIntServer&gt;());</span><br><span class="line">  rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>测试：<br>
+<code>ros2 service call /add_ints base_interfaces_demo/srv/Addints “&#123;'num1':10,'num2':30&#125;&quot;</code></p>
+<p>rclcpp::ok();<br>
+rclcpp::get_logger();     不依赖于context</p>
+<hr>
+<h3 id="客户端">客户端</h3>
+<p>main函数中需要判断提交参数是否正确<br>
+自定义节点类中要包括 判断是否连接到服务端</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;base_interfaces_demo/srv/addints.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> base_interfaces_demo::srv::Addints;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std::chrono_literals;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">AddIntClient</span> :<span class="keyword">public</span> rclcpp::Node &#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">AddIntClient</span>() :<span class="built_in">Node</span>(<span class="string">&quot;add_int_client&quot;</span>)&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;客户端节点创建&quot;</span>);</span><br><span class="line">        client_ = <span class="keyword">this</span>-&gt;<span class="built_in">create_client</span>&lt;Addints&gt;(<span class="string">&quot;add_ints&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">   <span class="comment">//连接服务器</span></span><br><span class="line">   <span class="function"><span class="type">bool</span> <span class="title">connect_server</span><span class="params">()</span></span>&#123;</span><br><span class="line">      <span class="comment">//以1s为超时时间，连接不上，一直连接</span></span><br><span class="line">        <span class="keyword">while</span>(!client_ -&gt; <span class="built_in">wait_for_service</span>(<span class="number">1</span>s))&#123;</span><br><span class="line">            <span class="comment">//rclcpp::ok()函数来检查ROS 2节点是否仍在运行</span></span><br><span class="line">            <span class="comment">//如果节点被请求停止（例如，通过按下Ctrl+C），rclcpp::ok()会返回false</span></span><br><span class="line">            <span class="keyword">if</span>(!rclcpp::<span class="built_in">ok</span>())&#123;</span><br><span class="line">                <span class="built_in">RCLCPP_INFO</span>(rclcpp::<span class="built_in">get_logger</span>(<span class="string">&quot;rclcpp&quot;</span>),<span class="string">&quot;强制退出&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            <span class="built_in">RCLCPP_INFO</span>(rclcpp::<span class="built_in">get_logger</span>(<span class="string">&quot;rclcpp&quot;</span>),<span class="string">&quot;服务器连接中&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;       </span><br><span class="line">   &#125;</span><br><span class="line">    <span class="comment">//发送请求函数</span></span><br><span class="line">    <span class="comment">//参数两个整形数据 返回服务器处理后的结果</span></span><br><span class="line"></span><br><span class="line">    rclcpp::Client&lt;Addints&gt;::<span class="function">SharedFuture <span class="title">send_request</span><span class="params">(<span class="type">int</span> num1,<span class="type">int</span> num2)</span></span>&#123;</span><br><span class="line">        <span class="keyword">auto</span> request = std::<span class="built_in">make_shared</span>&lt;Addints::Request&gt;();</span><br><span class="line">        request-&gt;num1 = num1;</span><br><span class="line">        request-&gt;num2 = num2;</span><br><span class="line">       <span class="comment">//rclcpp::Client&lt;base_interfaces_demo::srv::Addints&gt;::SharedFuture </span></span><br><span class="line">       <span class="comment">//async_send_request(std::shared_ptr&lt;base_interfaces_demo::srv::Addints_Request&gt; request)</span></span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> client_-&gt;<span class="built_in">async_send_request</span>(request);</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    rclcpp::Client&lt;Addints&gt;::SharedPtr  client_;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> **argv)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(argc != <span class="number">3</span>)&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_ERROR</span>(rclcpp::<span class="built_in">get_logger</span>(<span class="string">&quot;rclcpp&quot;</span>),<span class="string">&quot;请提交两个整型数据&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">auto</span> client = std::<span class="built_in">make_shared</span>&lt;AddIntClient&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="type">bool</span> flag = client-&gt;<span class="built_in">connect_server</span>();</span><br><span class="line">    <span class="comment">//判断是否链接上服务器</span></span><br><span class="line">    <span class="keyword">if</span>(!flag)&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(rclcpp::<span class="built_in">get_logger</span>(<span class="string">&quot;rclcpp&quot;</span>),<span class="string">&quot;服务器连接失败&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="comment">//调用请求提交函数，接收并处理响应结果</span></span><br><span class="line">    <span class="keyword">auto</span> future = client-&gt;<span class="built_in">send_request</span>(<span class="built_in">atoi</span>(argv[<span class="number">1</span>]),<span class="built_in">atoi</span>(argv[<span class="number">2</span>]));</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//处理响应</span></span><br><span class="line">    <span class="keyword">if</span>(rclcpp::<span class="built_in">spin_until_future_complete</span>(client,future) == rclcpp::FutureReturnCode::SUCCESS)&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(client-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;响应成功!sum = %d&quot;</span>,future.<span class="built_in">get</span>()-&gt;sum);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(client-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;sd&quot;</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="动作通信">动作通信</h2>
+<h3 id="自定义接口文件-2">自定义接口文件</h3>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">请求数据  </span><br><span class="line">---   </span><br><span class="line">响应数据  </span><br><span class="line">---   </span><br><span class="line">反馈数据  </span><br></pre></td></tr></table></figure>
+<p>xml：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">&lt;!-- action补充--&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">buildtool_depend</span>&gt;</span>rosidl_default_generators<span class="tag">&lt;/<span class="name">buildtool_depend</span>&gt;</span></span><br><span class="line">  <span class="tag">&lt;<span class="name">depend</span>&gt;</span>action_msgs<span class="tag">&lt;/<span class="name">depend</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<p>CMakeLists.txt补充rosidl_generate_interfaces</p>
+<h3 id="服务端-2">服务端</h3>
+<p><code>ros2 action send_goal /get_sum base_interfaces_demo/action/Progress -f &quot;&#123;'num':10&#125;&quot;</code></p>
+<p>rclcpp::Rate 的构造函数接受一个频率值（单位为 Hz），表示每秒执行的次数。例如：</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="function">rclcpp::Rate <span class="title">rate</span><span class="params">(<span class="number">1.0</span>)</span></span>;  <span class="comment">// 每秒执行 1 次，即每秒运行一次循环</span></span><br></pre></td></tr></table></figure>
+<p><code>rate.sleep()</code> 方法来暂停代码的执行，直到下一次循环的时间点。如果当前循环提前完成，rate.sleep() 会阻塞当前线程，直到达到预期的频率。</p>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp_action/rclcpp_action.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;base_interfaces_demo/action/progress.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> base_interfaces_demo::action::Progress;</span><br><span class="line"><span class="keyword">using</span> std::placeholders::_1;</span><br><span class="line"><span class="keyword">using</span> std::placeholders::_2;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ActionService</span> :<span class="keyword">public</span> rclcpp::Node&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="built_in">ActionService</span>() :<span class="built_in">Node</span>(<span class="string">&quot;action_service&quot;</span>)&#123;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;服务器已创建!&quot;</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//rclcpp_action::Server&lt;ActionT&gt;::SharedPtr </span></span><br><span class="line">    <span class="comment">//create_server&lt;ActionT, NodeT&gt;</span></span><br><span class="line">    <span class="comment">//(NodeT node, </span></span><br><span class="line">    <span class="comment">//const std::string &amp;name, </span></span><br><span class="line">    <span class="comment">//rclcpp_action::Server&lt;ActionT&gt;::GoalCallback handle_goal, </span></span><br><span class="line">    <span class="comment">//rclcpp_action::Server&lt;ActionT&gt;::CancelCallback handle_cancel, </span></span><br><span class="line">    <span class="comment">//rclcpp_action::Server&lt;ActionT&gt;::AcceptedCallback handle_accepted,</span></span><br><span class="line">    <span class="comment">// const rcl_action_server_options_t &amp;options = rcl_action_server_get_default_options(), rclcpp::CallbackGroup::SharedPtr group = nullptr)</span></span><br><span class="line"><span class="comment">//All provided callback functions must be non-blocking.</span></span><br><span class="line">    server_ = rclcpp_action::<span class="built_in">create_server</span>&lt;Progress&gt;(</span><br><span class="line">      <span class="keyword">this</span>, </span><br><span class="line">     <span class="string">&quot;get_sum&quot;</span>,</span><br><span class="line">     std::<span class="built_in">bind</span>(&amp;ActionService::handle_goal,<span class="keyword">this</span>,_1,_2),</span><br><span class="line">     std::<span class="built_in">bind</span>(&amp;ActionService::handle_cancel,<span class="keyword">this</span>,_1),</span><br><span class="line">     std::<span class="built_in">bind</span>(&amp;ActionService::handle_accepted,<span class="keyword">this</span>,_1)</span><br><span class="line">     );</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">  rclcpp_action::Server&lt;Progress&gt;::SharedPtr server_;</span><br><span class="line">  <span class="comment">//处理提交的目标值，注意参数</span></span><br><span class="line">  <span class="function">rclcpp_action::GoalResponse <span class="title">handle_goal</span><span class="params">(<span class="type">const</span> rclcpp_action::GoalUUID&amp; uuid,std::shared_ptr&lt;<span class="type">const</span> Progress::Goal&gt; goal)</span></span>&#123;</span><br><span class="line">    <span class="comment">//判断提交的数字是否大于1，大于接受，小于拒绝</span></span><br><span class="line">    <span class="keyword">if</span>(goal-&gt;num &lt;= <span class="number">1</span>)&#123;</span><br><span class="line">      <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;提交数据小于1&quot;</span>);</span><br><span class="line">      <span class="keyword">return</span> rclcpp_action::GoalResponse::REJECT;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;提交数据合法&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//处理取消请求</span></span><br><span class="line">  <span class="comment">//客户端可发送取消请求</span></span><br><span class="line">  <span class="function">rclcpp_action::CancelResponse <span class="title">handle_cancel</span><span class="params">(std::shared_ptr&lt;rclcpp_action::ServerGoalHandle&lt;Progress&gt;&gt; goal_handle)</span></span>&#123;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;任务已取消&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> rclcpp_action::CancelResponse::ACCEPT;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="comment">//生成连续反馈和最终响应</span></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">execute</span><span class="params">(std::shared_ptr&lt;rclcpp_action::ServerGoalHandle&lt;Progress&gt;&gt; goal_handle)</span></span>&#123;</span><br><span class="line">    <span class="comment">//生成连续反馈给客户端 goal_handle-&gt;publish_feedback()</span></span><br><span class="line">    <span class="comment">//void publish_feedback(std::shared_ptr&lt;base_interfaces_demo::action::Progress_Feedback&gt; feedback_msg)</span></span><br><span class="line">    <span class="comment">//首先获取目标值，遍历然后累加，每循环一次计算进度，作为连续反馈发布</span></span><br><span class="line">    <span class="type">int</span> num = goal_handle-&gt;<span class="built_in">get_goal</span>()-&gt;num;</span><br><span class="line">    <span class="type">int</span> sum=<span class="number">0</span>;</span><br><span class="line">    <span class="type">double</span> progress;</span><br><span class="line">    <span class="keyword">auto</span> feedback = std::<span class="built_in">make_shared</span>&lt;Progress::Feedback&gt;();</span><br><span class="line">    <span class="keyword">auto</span> result = std::<span class="built_in">make_shared</span>&lt;Progress::Result&gt;();</span><br><span class="line"></span><br><span class="line">    <span class="comment">//设置休眠,1s一次</span></span><br><span class="line">    <span class="function">rclcpp::Rate <span class="title">rate</span><span class="params">(<span class="number">1.0</span>)</span></span>;</span><br><span class="line">    <span class="keyword">for</span>(<span class="type">int</span> i = <span class="number">1</span>;i&lt;=num;i++)&#123;</span><br><span class="line">      sum+=i;</span><br><span class="line">      progress = i / (<span class="type">double</span>)num;</span><br><span class="line">      feedback-&gt;progress = progress;</span><br><span class="line">      goal_handle-&gt;<span class="built_in">publish_feedback</span>(feedback);</span><br><span class="line">      <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;连续反馈中，进度：%.2f&quot;</span>,progress);</span><br><span class="line"></span><br><span class="line">      <span class="comment">//判断是否接收到了取消请求</span></span><br><span class="line">      <span class="comment">//true——接收到取消请求</span></span><br><span class="line">      <span class="keyword">if</span>(goal_handle-&gt;<span class="built_in">is_canceling</span>())&#123;</span><br><span class="line">      </span><br><span class="line">        <span class="comment">//canceled(std::shared_ptr&lt;base_interfaces_demo::action::Progress_Result&gt; result_msg)</span></span><br><span class="line">        <span class="comment">//取消时发送最终结果</span></span><br><span class="line">        result-&gt;sum = sum;</span><br><span class="line">        goal_handle-&gt;<span class="built_in">canceled</span>(result);</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;反馈取消，结果：%d&quot;</span>,sum);</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">return</span> ;</span><br><span class="line">      &#125;</span><br><span class="line">      rate.<span class="built_in">sleep</span>();</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="comment">//生成最终响应结果 goal_handle-&gt;succeed()</span></span><br><span class="line">    <span class="comment">//void succeed(std::shared_ptr&lt;base_interfaces_demo::action::Progress_Result&gt; result_msg)</span></span><br><span class="line">    <span class="keyword">if</span>(rclcpp::<span class="built_in">ok</span>())&#123;</span><br><span class="line">      result-&gt;sum = sum;</span><br><span class="line">      goal_handle-&gt;<span class="built_in">succeed</span>(result);</span><br><span class="line">      <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;最终响应结果：%d&quot;</span>,sum);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">handle_accepted</span><span class="params">(std::shared_ptr&lt;rclcpp_action::ServerGoalHandle&lt;Progress&gt;&gt; goal_handle)</span></span>&#123;</span><br><span class="line">    <span class="comment">//新建子线程处理耗时的主逻辑实现</span></span><br><span class="line">    std::<span class="built_in">thread</span>(std::<span class="built_in">bind</span>(&amp;ActionService::execute,<span class="keyword">this</span>,goal_handle)).<span class="built_in">detach</span>();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> **argv)</span></span>&#123;</span><br><span class="line">  rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line">  rclcpp::<span class="built_in">spin</span>(std::<span class="built_in">make_shared</span>&lt;ActionService&gt;());</span><br><span class="line">  </span><br><span class="line">  rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="客户端-2">客户端</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp_action/rclcpp_action.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;base_interfaces_demo/action/progress.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> base_interfaces_demo::action::Progress;</span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std::chrono_literals;</span><br><span class="line"><span class="keyword">using</span> std::placeholders::_1;</span><br><span class="line"><span class="keyword">using</span> std::placeholders::_2;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">ActionClient</span> :<span class="keyword">public</span> rclcpp::Node&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">   <span class="built_in">ActionClient</span>() :<span class="built_in">Node</span>(<span class="string">&quot;action_client&quot;</span>)&#123;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;Action 客户端已创建&quot;</span>);</span><br><span class="line">    <span class="comment">//rclcpp::CallbackGroup::SharedPtr group = nullptr)</span></span><br><span class="line">    client_ = rclcpp_action::<span class="built_in">create_client</span>&lt;Progress&gt;(<span class="keyword">this</span>,<span class="string">&quot;get_sum&quot;</span>);</span><br><span class="line">   &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">send</span><span class="params">(<span class="type">int</span> num)</span></span>&#123;</span><br><span class="line">        <span class="comment">//1.连接到服务器</span></span><br><span class="line">        <span class="keyword">if</span>(!client_-&gt;<span class="built_in">wait_for_action_server</span>(<span class="number">10</span>s))&#123;</span><br><span class="line">            <span class="built_in">RCLCPP_ERROR</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;服务器连接失败！&quot;</span>);</span><br><span class="line">            <span class="keyword">return</span> ;</span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//2.发送请求</span></span><br><span class="line">       </span><br><span class="line">        <span class="keyword">auto</span> goal = Progress::<span class="built_in">Goal</span>();</span><br><span class="line">        <span class="keyword">auto</span> options = rclcpp_action::Client&lt;Progress&gt;::<span class="built_in">SendGoalOptions</span>();</span><br><span class="line"></span><br><span class="line">        goal.num = num;</span><br><span class="line"> </span><br><span class="line">        options.feedback_callback = std::<span class="built_in">bind</span>(&amp;ActionClient::feedback_callback,<span class="keyword">this</span>,_1,_2);</span><br><span class="line">        options.goal_response_callback = std::<span class="built_in">bind</span>(&amp;ActionClient::goal_response_callback,<span class="keyword">this</span>,_1);</span><br><span class="line">        options.result_callback = std::<span class="built_in">bind</span>(&amp;ActionClient::result_callback,<span class="keyword">this</span>,_1);</span><br><span class="line"></span><br><span class="line">        <span class="keyword">auto</span> future = client_-&gt;<span class="built_in">async_send_goal</span>(goal,options);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">feedback_callback</span><span class="params">(rclcpp_action::ClientGoalHandle&lt;Progress&gt;::SharedPtr goal_handle,<span class="type">const</span> std::shared_ptr&lt;<span class="type">const</span> Progress::Feedback&gt; feedback)</span></span>&#123;</span><br><span class="line">        <span class="type">double</span> progress = feedback-&gt;progress;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;进度：%lf&quot;</span>,progress);</span><br><span class="line">    &#125;</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//处理关于目标值的服务端响应</span></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">goal_response_callback</span><span class="params">(std::shared_future&lt;rclcpp_action::ClientGoalHandle&lt;Progress&gt;::SharedPtr&gt; goal_handle)</span></span>&#123;</span><br><span class="line">        <span class="comment">//响应成功返回指针,注意！！！</span></span><br><span class="line">        <span class="keyword">if</span>(!goal_handle.<span class="built_in">get</span>())&#123;</span><br><span class="line">            <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;请求被拒绝&quot;</span>);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;请求成功&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">result_callback</span><span class="params">(<span class="type">const</span> rclcpp_action::ClientGoalHandle&lt;Progress&gt;::WrappedResult &amp;result)</span></span>&#123;</span><br><span class="line">        <span class="comment">//result.code 状态码判断最终结果状态 状态玛封装在rclcpp_action::ResultCode::</span></span><br><span class="line">        <span class="keyword">if</span>(result.code == rclcpp_action::ResultCode::SUCCEEDED)&#123;</span><br><span class="line">            <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;成功！，结果：%d&quot;</span>,result.result-&gt;sum);</span><br><span class="line">        &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">            <span class="built_in">RCLCPP_ERROR</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;失败!&quot;</span>);</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    rclcpp_action::Client&lt;Progress&gt;::SharedPtr client_;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> **argv)</span></span>&#123;</span><br><span class="line">    <span class="keyword">if</span>(argc !=<span class="number">2</span> )&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_ERROR</span>(rclcpp::<span class="built_in">get_logger</span>(<span class="string">&quot;rclcpp&quot;</span>),<span class="string">&quot;请提交一个整型数据！&quot;</span>);</span><br><span class="line">        <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line">    <span class="keyword">auto</span> node = std::<span class="built_in">make_shared</span>&lt;ActionClient&gt;();</span><br><span class="line">    </span><br><span class="line">    node-&gt;<span class="built_in">send</span>(<span class="built_in">atoi</span>(argv[<span class="number">1</span>]));</span><br><span class="line"></span><br><span class="line">    rclcpp::<span class="built_in">spin</span>(node);</span><br><span class="line">    rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h2 id="参数通信">参数通信</h2>
+<p><img src="/2025/ros2-communication/parameter-type.png" alt="parameter-type" loading="lazy"></p>
+<p><img src="/2025/ros2-communication/param-example.png" alt="param-example" loading="lazy"></p>
+<p><code>ros2 param list</code><br>
+查询参数<br>
+<code>ros2 param get my_server wheels</code><br>
+查询参数值</p>
+<h3 id="服务端-3">服务端</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyServer</span> :<span class="keyword">public</span> rclcpp::Node&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">  <span class="comment">//如果允许删除参数，需要通过NodeOptions配置</span></span><br><span class="line">  <span class="built_in">MyServer</span>() :<span class="built_in">Node</span>(<span class="string">&quot;my_server&quot;</span>,rclcpp::<span class="built_in">NodeOptions</span>().<span class="built_in">allow_undeclared_parameters</span>(<span class="literal">true</span>))&#123;</span><br><span class="line">  </span><br><span class="line">  <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;参数服务器已建立&quot;</span>);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">declare</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;------------增-----------&quot;</span>);</span><br><span class="line">    <span class="keyword">this</span>-&gt;<span class="built_in">declare_parameter</span>(<span class="string">&quot;car_type&quot;</span>,<span class="string">&quot;tiger&quot;</span>);</span><br><span class="line">    <span class="keyword">this</span>-&gt;<span class="built_in">declare_parameter</span>(<span class="string">&quot;width&quot;</span>,<span class="number">1.5</span>);</span><br><span class="line">    <span class="keyword">this</span>-&gt;<span class="built_in">declare_parameter</span>(<span class="string">&quot;wheels&quot;</span>,<span class="number">5</span>);</span><br><span class="line">    </span><br><span class="line">    <span class="comment">//set也可以，但必须rclcpp::NodeOptions().allow_undeclared_parameters(true)</span></span><br><span class="line">    <span class="keyword">this</span>-&gt;<span class="built_in">set_parameter</span>(rclcpp::<span class="built_in">Parameter</span>(<span class="string">&quot;height&quot;</span>,<span class="number">1.8</span>));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">get</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;------------查-----------&quot;</span>);</span><br><span class="line">    <span class="comment">//指定</span></span><br><span class="line">    <span class="keyword">auto</span> car = <span class="keyword">this</span>-&gt;<span class="built_in">get_parameter</span>(<span class="string">&quot;car_type&quot;</span>);</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;key = %s , value = %s&quot;</span>,car.<span class="built_in">get_name</span>().<span class="built_in">c_str</span>(),car.<span class="built_in">as_string</span>().<span class="built_in">c_str</span>());</span><br><span class="line">    <span class="comment">//一些</span></span><br><span class="line">    <span class="keyword">auto</span> params = <span class="keyword">this</span>-&gt;<span class="built_in">get_parameters</span>(&#123;<span class="string">&quot;car_type&quot;</span>,<span class="string">&quot;width&quot;</span>,<span class="string">&quot;wheels&quot;</span>&#125;);</span><br><span class="line">    <span class="keyword">for</span>(rclcpp::Parameter n : params)&#123;</span><br><span class="line">      <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;key = %s , value = %s&quot;</span>,n.<span class="built_in">get_name</span>().<span class="built_in">c_str</span>(),n.<span class="built_in">value_to_string</span>().<span class="built_in">c_str</span>());</span><br><span class="line">     </span><br><span class="line">    <span class="comment">//判断是否含有</span></span><br><span class="line">      <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;是否包含%s? %d&quot;</span>,n.<span class="built_in">get_name</span>().<span class="built_in">c_str</span>(),<span class="keyword">this</span>-&gt;<span class="built_in">has_parameter</span>(n.<span class="built_in">get_name</span>()));</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">update</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;------------改-----------&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="keyword">this</span>-&gt;<span class="built_in">set_parameter</span>(rclcpp::<span class="built_in">Parameter</span>(<span class="string">&quot;width&quot;</span>,<span class="number">1.4</span>));</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;width = %lf&quot;</span>,<span class="keyword">this</span>-&gt;<span class="built_in">get_parameter</span>(<span class="string">&quot;width&quot;</span>).<span class="built_in">as_double</span>());</span><br><span class="line"></span><br><span class="line">  &#125;</span><br><span class="line">  <span class="function"><span class="type">void</span> <span class="title">del</span><span class="params">()</span></span>&#123;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;------------删-----------&quot;</span>);</span><br><span class="line">    <span class="keyword">this</span>-&gt;<span class="built_in">undeclare_parameter</span>(<span class="string">&quot;car_type&quot;</span>);</span><br><span class="line"></span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;car_type还存在吗? %d&quot;</span>,<span class="keyword">this</span>-&gt;<span class="built_in">has_parameter</span>(<span class="string">&quot;car_type&quot;</span>));</span><br><span class="line">  &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> **argv)</span></span>&#123;</span><br><span class="line">  rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line">  </span><br><span class="line">  <span class="keyword">auto</span> node = std::<span class="built_in">make_shared</span>&lt;MyServer&gt;();</span><br><span class="line">  node-&gt;<span class="built_in">declare</span>();</span><br><span class="line">  node-&gt;<span class="built_in">get</span>();</span><br><span class="line">  node-&gt;<span class="built_in">update</span>();</span><br><span class="line">  node-&gt;<span class="built_in">del</span>();</span><br><span class="line"></span><br><span class="line">  rclcpp::<span class="built_in">spin</span>(node);</span><br><span class="line">  rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<h3 id="客户端-3">客户端</h3>
+<figure class="highlight cpp"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;rclcpp/rclcpp.hpp&gt;</span></span></span><br><span class="line"><span class="meta">#<span class="keyword">include</span> <span class="string">&lt;vector&gt;</span></span></span><br><span class="line"></span><br><span class="line"><span class="keyword">using</span> <span class="keyword">namespace</span> std::chrono_literals;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> <span class="title class_">MyClient</span> :<span class="keyword">public</span> rclcpp::Node&#123;</span><br><span class="line"><span class="keyword">public</span>:</span><br><span class="line">    <span class="built_in">MyClient</span>() :<span class="built_in">Node</span>(<span class="string">&quot;my_client&quot;</span>)&#123;</span><br><span class="line">    <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;参数客户端已建立&quot;</span>);</span><br><span class="line">    client_ = std::<span class="built_in">make_shared</span>&lt;rclcpp::SyncParametersClient&gt;(<span class="keyword">this</span>,<span class="string">&quot;my_server&quot;</span>);</span><br><span class="line"></span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">bool</span> <span class="title">connect_server</span><span class="params">()</span></span>&#123;</span><br><span class="line">        </span><br><span class="line">        <span class="keyword">while</span>(!client_-&gt;<span class="built_in">wait_for_service</span>(<span class="number">1</span>s))&#123;</span><br><span class="line">            </span><br><span class="line">            <span class="keyword">if</span>(!rclcpp::<span class="built_in">ok</span>())&#123;</span><br><span class="line">                <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;中断!&quot;</span>);</span><br><span class="line">                <span class="keyword">return</span> <span class="literal">false</span>;</span><br><span class="line">            &#125;</span><br><span class="line">            </span><br><span class="line">            <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;连接中&quot;</span>);        </span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="keyword">return</span> <span class="literal">true</span>;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    <span class="function"><span class="type">void</span> <span class="title">get</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;获取&quot;</span>);</span><br><span class="line">        </span><br><span class="line">        <span class="comment">//获取单个</span></span><br><span class="line">        std::string car_name =client_-&gt;<span class="built_in">get_parameter</span>&lt;std::string&gt;(<span class="string">&quot;car_type&quot;</span>);</span><br><span class="line">        <span class="type">double</span> width = client_-&gt;<span class="built_in">get_parameter</span>&lt;<span class="type">double</span>&gt;(<span class="string">&quot;width&quot;</span>);</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;car_name:%s&quot;</span>,car_name.<span class="built_in">c_str</span>());</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;width:%lf&quot;</span>,width);</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">        <span class="comment">//获取多个</span></span><br><span class="line">        <span class="keyword">auto</span> params = client_-&gt;<span class="built_in">get_parameters</span>(&#123;<span class="string">&quot;car_type&quot;</span>,<span class="string">&quot;width&quot;</span>&#125;);</span><br><span class="line">        <span class="keyword">for</span>(rclcpp::Parameter  n : params)&#123;</span><br><span class="line">            <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;key = %s , value = %s&quot;</span>,n.<span class="built_in">get_name</span>().<span class="built_in">c_str</span>(),n.<span class="built_in">value_to_string</span>().<span class="built_in">c_str</span>());</span><br><span class="line"></span><br><span class="line">        &#125;</span><br><span class="line"></span><br><span class="line">        <span class="comment">//判断是否含有_IN</span></span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;car_type? %d&quot;</span>,client_-&gt;<span class="built_in">has_parameter</span>(<span class="string">&quot;car_type&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line">     <span class="function"><span class="type">void</span> <span class="title">update</span><span class="params">()</span></span>&#123;</span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;修改&quot;</span>);</span><br><span class="line">        client_-&gt;<span class="built_in">set_parameters</span>(&#123;rclcpp::<span class="built_in">Parameter</span>(<span class="string">&quot;car_type&quot;</span>,<span class="string">&quot;pig&quot;</span>),</span><br><span class="line">        rclcpp::<span class="built_in">Parameter</span>(<span class="string">&quot;length&quot;</span>,<span class="string">&quot;5.0&quot;</span>)&#125;);<span class="comment">//不存在也可以，但要保证服务端那个参数</span></span><br><span class="line"></span><br><span class="line">        <span class="built_in">RCLCPP_INFO</span>(<span class="keyword">this</span>-&gt;<span class="built_in">get_logger</span>(),<span class="string">&quot;length? %d&quot;</span>,client_-&gt;<span class="built_in">has_parameter</span>(<span class="string">&quot;length&quot;</span>));</span><br><span class="line">    &#125;</span><br><span class="line"><span class="keyword">private</span>:</span><br><span class="line">    rclcpp::SyncParametersClient::SharedPtr client_;</span><br><span class="line"></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="type">int</span> <span class="title">main</span><span class="params">(<span class="type">int</span> argc,<span class="type">char</span> **argv)</span></span>&#123;</span><br><span class="line">    rclcpp::<span class="built_in">init</span>(argc,argv);</span><br><span class="line">    <span class="keyword">auto</span> note = std::<span class="built_in">make_shared</span>&lt;MyClient&gt;();</span><br><span class="line">    </span><br><span class="line">    <span class="type">bool</span> flag = note-&gt;<span class="built_in">connect_server</span>();</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span>(!flag == <span class="literal">true</span>)&#123;</span><br><span class="line">        <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">    &#125;</span><br><span class="line">    note-&gt;<span class="built_in">get</span>();</span><br><span class="line">    note-&gt;<span class="built_in">update</span>();</span><br><span class="line">    note-&gt;<span class="built_in">get</span>();</span><br><span class="line">    rclcpp::<span class="built_in">spin</span>(note);</span><br><span class="line">    rclcpp::<span class="built_in">shutdown</span>();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<hr>
+<p>出现乱码：C语言字符串输出不兼容</p>
+
+      </div>
+      
+        <div class="prev-or-next">
+          <div class="post-foot-next">
+            
+              <a href="/2025/ros2-base/" target="_self">
+                <i class="iconfont icon-chevronleft"></i>
+                <span>上一页</span>
+              </a>
+            
+          </div>
+          <div class="post-attach">
+            <span class="post-pubtime">
+              <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
+              2025-09-20 22:21:44
+            </span>
+            
+                  <span class="post-tags">
+                    <i class="iconfont icon-tags mr-10" title="标签"></i>
+                    
+                    <span class="span--tag mr-8">
+                      <a href="/tags/ros2/" title="ros2">
+                        #ros2
+                      </a>
+                    </span>
+                    
+                  </span>
+              
+          </div>
+          <div class="post-foot-prev">
+            
+              <a href="/2025/pid/" target="_self">
+                <span>下一页</span>
+                <i class="iconfont icon-chevronright"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+    </div>
+    
+  <div id="btn-catalog" class="btn-catalog">
+    <i class="iconfont icon-catalog"></i>
+  </div>
+  <div class="post-catalog hidden" id="catalog">
+    <div class="title">目录</div>
+    <div class="catalog-content">
+      
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%8E%A5%E5%8F%A3"><span class="toc-text">接口</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#interface"><span class="toc-text"></span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E8%AF%9D%E9%A2%98%E9%80%9A%E4%BF%A1%EF%BC%9A"><span class="toc-text">话题通信：</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%8F%91%E5%B8%83%E8%80%85%EF%BC%9A"><span class="toc-text">发布者：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%AE%A2%E9%98%85%E6%96%B9"><span class="toc-text">订阅方</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%A5%E5%8F%A3%E6%96%87%E4%BB%B6%E2%80%94%E2%80%94%E7%BC%96%E8%AF%91%E5%89%8D%E4%BF%9D%E5%AD%98%EF%BC%81%EF%BC%81%EF%BC%81%EF%BC%81"><span class="toc-text">自定义接口文件——编译前保存！！！！</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#xml%E6%96%87%E4%BB%B6%E9%85%8D%E7%BD%AE"><span class="toc-text">xml文件配置</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CMakeLists-txt"><span class="toc-text">CMakeLists.txt</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E9%80%9A%E4%BF%A1"><span class="toc-text">服务通信</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%A5%E5%8F%A3%E6%96%87%E4%BB%B6"><span class="toc-text">自定义接口文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF"><span class="toc-text">服务端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF"><span class="toc-text">客户端</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8A%A8%E4%BD%9C%E9%80%9A%E4%BF%A1"><span class="toc-text">动作通信</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%87%AA%E5%AE%9A%E4%B9%89%E6%8E%A5%E5%8F%A3%E6%96%87%E4%BB%B6-2"><span class="toc-text">自定义接口文件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF-2"><span class="toc-text">服务端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF-2"><span class="toc-text">客户端</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%8F%82%E6%95%B0%E9%80%9A%E4%BF%A1"><span class="toc-text">参数通信</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF-3"><span class="toc-text">服务端</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF-3"><span class="toc-text">客户端</span></a></li></ol></li></ol>
+      
+    </div>
+  </div>
+
+  
+<script src="/js/catalog.js"></script>
+
+
+
+
+    
+      <div class="comments-container">
+        
+
+
+
+
+
+
+
+      </div>
+    
+  </div>
+
+
+        
+<div class="footer">
+  <div class="social">
+    <ul>
+      
+        <li>
+          
+              <a title="github" target="_blank" rel="noopener" href="https://github.com/Choosen123">
+                <i class="iconfont icon-github"></i>
+              </a>
+              
+        </li>
+        
+    </ul>
+  </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Copyright © 2025 Oranges</a>
+        
+    </div>
+  
+    
+    <div class="footer-more">
+      
+        <a target="_blank" rel="noopener" href="https://github.com/zchengsite/hexo-theme-oranges">Theme by Oranges | Powered by Hexo</a>
+        
+    </div>
+  
+  
+</div>
+
+      </div>
+
+      <div class="tools-bar">
+        <div class="back-to-top tools-bar-item hidden">
+  <a href="javascript: void(0)">
+    <i class="iconfont icon-chevronup"></i>
+  </a>
+</div>
+
+
+<script src="/js/backtotop.js"></script>
+
+
+
+        
+  <div class="search-icon tools-bar-item" id="search-icon">
+    <a href="javascript: void(0)">
+      <i class="iconfont icon-search"></i>
+    </a>
+  </div>
+
+  <div class="search-overlay hidden">
+    <div class="search-content" tabindex="0">
+      <div class="search-title">
+        <span class="search-icon-input">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-search"></i>
+          </a>
+        </span>
+        
+          <input type="text" class="search-input" id="search-input" placeholder="搜索...">
+        
+        <span class="search-close-icon" id="search-close-icon">
+          <a href="javascript: void(0)">
+            <i class="iconfont icon-close"></i>
+          </a>
+        </span>
+      </div>
+      <div class="search-result" id="search-result"></div>
+    </div>
+  </div>
+
+  <script type="text/javascript">
+    var inputArea = document.querySelector("#search-input")
+    var searchOverlayArea = document.querySelector(".search-overlay")
+
+    inputArea.onclick = function() {
+      getSearchFile()
+      this.onclick = null
+    }
+
+    inputArea.onkeydown = function() {
+      if(event.keyCode == 13)
+        return false
+    }
+
+    function openOrHideSearchContent() {
+      let isHidden = searchOverlayArea.classList.contains('hidden')
+      if (isHidden) {
+        searchOverlayArea.classList.remove('hidden')
+        document.body.classList.add('hidden')
+        // inputArea.focus()
+      } else {
+        searchOverlayArea.classList.add('hidden')
+        document.body.classList.remove('hidden')
+      }
+    }
+
+    function blurSearchContent(e) {
+      if (e.target === searchOverlayArea) {
+        openOrHideSearchContent()
+      }
+    }
+
+    document.querySelector("#search-icon").addEventListener("click", openOrHideSearchContent, false)
+    document.querySelector("#search-close-icon").addEventListener("click", openOrHideSearchContent, false)
+    searchOverlayArea.addEventListener("click", blurSearchContent, false)
+
+    var searchFunc = function (path, search_id, content_id) {
+      'use strict';
+      var $input = document.getElementById(search_id);
+      var $resultContent = document.getElementById(content_id);
+      $resultContent.innerHTML = "<ul><span class='local-search-empty'>首次搜索，正在载入索引文件，请稍后……<span></ul>";
+      $.ajax({
+        // 0x01. load xml file
+        url: path,
+        dataType: "xml",
+        success: function (xmlResponse) {
+          // 0x02. parse xml file
+          var datas = $("entry", xmlResponse).map(function () {
+            return {
+              title: $("title", this).text(),
+              content: $("content", this).text(),
+              url: $("url", this).text()
+            };
+          }).get();
+          $resultContent.innerHTML = "";
+
+          $input.addEventListener('input', function () {
+            // 0x03. parse query to keywords list
+            var str = '<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length <= 0) {
+              return;
+            }
+            // 0x04. perform local searching
+            datas.forEach(function (data) {
+              var isMatch = true;
+              var content_index = [];
+              if (!data.title || data.title.trim() === '') {
+                data.title = "Untitled";
+              }
+              var orig_data_title = data.title.trim();
+              var data_title = orig_data_title.toLowerCase();
+              var orig_data_content = data.content.trim().replace(/<[^>]+>/g, "");
+              var data_content = orig_data_content.toLowerCase();
+              var data_url = data.url;
+              var index_title = -1;
+              var index_content = -1;
+              var first_occur = -1;
+              // only match artiles with not empty contents
+              if (data_content !== '') {
+                keywords.forEach(function (keyword, i) {
+                  index_title = data_title.indexOf(keyword);
+                  index_content = data_content.indexOf(keyword);
+
+                  if (index_title < 0 && index_content < 0) {
+                    isMatch = false;
+                  } else {
+                    if (index_content < 0) {
+                      index_content = 0;
+                    }
+                    if (i == 0) {
+                      first_occur = index_content;
+                    }
+                    // content_index.push({index_content:index_content, keyword_len:keyword_len});
+                  }
+                });
+              } else {
+                isMatch = false;
+              }
+              // 0x05. show search results
+              if (isMatch) {
+                str += "<li><a href='" + data_url + "' class='search-result-title'>" + orig_data_title + "</a>";
+                var content = orig_data_content;
+                if (first_occur >= 0) {
+                  // cut out 100 characters
+                  var start = first_occur - 20;
+                  var end = first_occur + 80;
+
+                  if (start < 0) {
+                    start = 0;
+                  }
+
+                  if (start == 0) {
+                    end = 100;
+                  }
+
+                  if (end > content.length) {
+                    end = content.length;
+                  }
+
+                  var match_content = content.substr(start, end);
+
+                  // highlight all keywords
+                  keywords.forEach(function (keyword) {
+                    var regS = new RegExp(keyword, "gi");
+                    match_content = match_content.replace(regS, "<span class=\"search-keyword\">" + keyword + "</span>");
+                  });
+
+                  str += "<p class=\"search-result-abstract\">" + match_content + "...</p>"
+                }
+                str += "</li>";
+              }
+            });
+            str += "</ul>";
+            if (str.indexOf('<li>') === -1) {
+              return $resultContent.innerHTML = "<ul><span class='local-search-empty'>没有找到内容，请尝试更换检索词。<span></ul>";
+            }
+            $resultContent.innerHTML = str;
+          });
+        },
+        error: function(xhr, status, error) {
+          $resultContent.innerHTML = ""
+          if (xhr.status === 404) {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>未找到search.xml文件，具体请参考：<a href='https://github.com/zchengsite/hexo-theme-oranges#configuration' target='_black'>configuration</a><span></ul>";
+          } else {
+            $resultContent.innerHTML = "<ul><span class='local-search-empty'>请求失败，尝试重新刷新页面或稍后重试。<span></ul>";
+          }
+        }
+      });
+      $(document).on('click', '#search-close-icon', function() {
+        $('#search-input').val('');
+        $('#search-result').html('');
+      });
+    }
+
+    var getSearchFile = function() {
+        var path = "/search.xml";
+        searchFunc(path, 'search-input', 'search-result');
+    }
+  </script>
+
+
+
+
+        
+  <div class="tools-bar-item theme-icon" id="switch-color-scheme">
+    <a href="javascript: void(0)">
+      <i id="theme-icon" class="iconfont icon-moon"></i>
+    </a>
+  </div>
+
+  
+<script src="/js/colorscheme.js"></script>
+
+
+
+
+
+        
+  
+    <div class="share-icon tools-bar-item">
+      <a href="javascript: void(0)" id="share-icon">
+        <i class="iconfont iconshare"></i>
+      </a>
+      <div class="share-content hidden">
+        
+          <a class="share-item" href="https://twitter.com/intent/tweet?text=' + ros2-communication + '&url=' + https%3A%2F%2Fchoosen123.github.io%2F2025%2Fros2-communication%2F + '" target="_blank" title="Twitter">
+            <i class="iconfont icon-twitter"></i>
+          </a>
+        
+        
+          <a class="share-item" href="https://www.facebook.com/sharer.php?u=https://choosen123.github.io/2025/ros2-communication/" target="_blank" title="Facebook">
+            <i class="iconfont icon-facebooksquare"></i>
+          </a>
+        
+      </div>
+    </div>
+  
+  
+<script src="/js/shares.js"></script>
+
+
+
+      </div>
+    </div>
+  </body>
+</html>

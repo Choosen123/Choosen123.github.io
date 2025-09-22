@@ -149,7 +149,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2025-09-15 20:43:36
+          2025-09-22 22:22:39
         </span>
         
               <span class="post-tags">
@@ -183,9 +183,11 @@
 <ul>
 <li>隐性电平(Recessive)对应于逻辑1</li>
 <li>显性电平(Dominant)对应于逻辑0<br>
-<img src="/./can-bus/voltage-level.jpg" alt="总线电平" loading="lazy"><br>
-高速CAN中隐性电平在电压差0附近，显性电平主要在电压差2V附近。</li>
+<img src="/./can-bus/voltage-level.png" alt="总线电平" loading="lazy"></li>
+<li>高速CAN中隐性电平在电压差0附近，显性电平主要在电压差2V附近。</li>
 </ul>
+<p>在高速和低速CAN中,从隐性信号向显性信号过渡的速度更快，因为此时CAN线缆被主动积极地驱动。显性向隐性的过渡速度主要取决于CAN网络的长度和导线的电容。</p>
+<p>CAN总线采用不归零码位填充技术（NRZ），发送器只要检测到位流里有5个连续相同值的位，便自动在位流里插入补充位。(后续说明)</p>
 <p>CAN总线上的一个终端设备称为一个节点(Node)，没有主设备从设备的区别。一个CAN节点的硬件部分一般由两部分组成：</p>
 <ul>
 <li>CAN控制器：实现CAN协议逻辑层功能，构建符合CAN协议的数据帧等，仲裁等等。</li>
@@ -201,6 +203,63 @@
 </ul>
 <p>仲裁机制： CAN总线采用非破坏性仲裁机制，通过比较消息标识符的优先级来决定哪个节点有权继续发送数据。这种机制确保了总线上数据传输的有序性，避免了冲突。</p>
 <p>广播通信： CAN总线采用广播通信方式，即发送的数据帧可以被总线上的所有节点接收。这种特性有助于信息的共享和同步，同时减少了系统的复杂性。</p>
+<h2 id="CAN位时序和波特率">CAN位时序和波特率</h2>
+<p>一个CAN网络需要规定一个通信的波特率，各节点都以相同的波特率进行数据通信。<br>
+为了实现位同步，CAN 协议把每一个数据位的时序分解成如图所示的SS 段、PTS 段、PBS1 段、PBS2段，这四段的长度加起来即为一个CAN数据位的长度。分解后最小的时间单位是Tq(time quantum，时间片)，而一个完整的位由8~25个Tq组成。</p>
+<p>Tq：tq由CAN控制器的时钟频率fcan决定。在STM32F407中，两个CAN控制器在APB1总线上，CAN控制器有预分频器，APB1总线的时钟信号PCLK1经分频后得到fcan。</p>
+<p><img src="/./can-bus/bit-time.png" alt="位时序" loading="lazy"><br>
+(总线电平并没有在一个位时序内发生数次电平变化！！！图有误导性)</p>
+<blockquote>
+<p>发送节点产生跳变沿的物理过程</p>
+<ul>
+<li>总线空闲状态：当总线空闲时，所有节点都不驱动总线，总线处于隐性状态(高电平，逻辑1)。<br>
+CAN使用差分信号，空闲时CAN_H与CAN_L之间的电位差约为0V</li>
+<li>发送开始：<br>
+当控制器准备发送时，首先发送SOF(起始帧)位，这是一个显性位(低电平，逻辑0)。<br>
+发送节点通过驱动其收发器输出级，使CAN_H线变为约3.5V，CAN_L线变为约1.5V，这产生了约2V的电位差，代表显性位(0)</li>
+<li>关键跳变沿：从空闲(隐性,1)到SOF(显性,0)的转变产生了一个从高到低的跳变沿,这个下降沿是CAN帧传输开始的标志，也是所有接收节点开始同步的触发点</li>
+</ul>
+</blockquote>
+<p>该图中表示的CAN通讯信号每一个数据位的长度为19Tq，其中SS段占1Tq，PTS段占6Tq，PBS1段占5Tq，PBS2段占7Tq。信号的采样点位于<strong>PBS1段与PBS2段之间</strong>，通过控制各段的长度，可以对采样点的位置进行偏移，以便准确地采样。</p>
+<ul>
+<li>
+<p>SS段(SYNC SEG)同步段<br>
+若通讯节点检测到总线上信号的跳变沿被包含在 SS 段的范围之内，则表示节点与总线的时序是同步的，当节点与总线同步时，采样点采集到的总线电平即可被确定为该位的电平。SS 段的大小固定为 1Tq。</p>
+</li>
+<li>
+<p>PTS段(PROP SEG)传播时间段<br>
+用于补偿网络的物理延时时间。是总线上输入比较器延时和输出驱动器延时总和的两倍。PTS 段的大小可以为 1~8Tq。<br>
+如果没有PTS段，当发送节点刚开始发送位的时候，远端接收节点还没有收到信号，可能会错过重要的边沿信息，导致同步失败。</p>
+</li>
+<li>
+<p>PBS1段(PHASE SEG1)相位缓冲段<br>
+用来补偿边沿阶段的误差，它的时间长度在重新同步的时候可以加长。PBS1 段的初始大小可以为 1~8Tq。</p>
+</li>
+<li>
+<p>PBS2段(PHASE SEG2)相位缓冲段<br>
+用来补偿边沿阶段误差的，它的时间长度在重新同步时可以缩短。PBS2 段的初始大小可以为 2~8Tq。</p>
+</li>
+</ul>
+<blockquote>
+<p>当节点检测到边沿不在预期的SS段时，启动再同步:<br>
+如果边沿提前到来，PBS2段会被缩短,<br>
+如果边沿延后到来，PBS1段会被延长,<br>
+调整量受SJW(同步跳跃宽度)限制</p>
+</blockquote>
+<ul>
+<li>SJW(resynchronization Jump Width)再同步跳转宽度<br>
+决定了相位缓冲段加长或缩短的上限，通常为1～4个tq。</li>
+</ul>
+<blockquote>
+<p>如果检测到边沿在SS段后3Tq出现,受SJW(2Tq)限制，只能延长PBS1段2Tq，仍存在偏差，怎么办？<br>
+CAN不试图在单次重新同步中完全纠正所有偏差，而是通过多个位的连续重新同步来逐渐达到更好的同步状态，随后的位传输中会继续执行重新同步，逐步减小累积偏差。<br>
+采样点通常设置在位时间的70%-80%处,即使有1Tq的残余偏差，采样点仍能落在信号稳定区域。只要残余偏差不导致采样点跨越位边界，通信仍然可靠</p>
+</blockquote>
+<p>通过位时序的控制，CAN总线可以进行位同步，以吸收节点时钟差异产生的波特率误差，保证接收数据的准确性。</p>
+<p>波特率：总线上的各个通讯节点只要约定好 1 个 Tq 的时间长度以及每一个数据位占据多少个 Tq，就可以确定 CAN 通讯的波特率。</p>
+<blockquote>
+<p>虽然严格来说同步调整确实会暂时改变位时长（影响瞬时波特率），但系统的整体通信速率仍由配置的波特率决定。</p>
+</blockquote>
 
       </div>
       
@@ -216,7 +275,7 @@
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2025-09-15 20:43:36
+              2025-09-22 22:22:39
             </span>
             
                   <span class="post-tags">
@@ -250,7 +309,7 @@
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC"><span class="toc-text">基本</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC"><span class="toc-text">基本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CAN%E4%BD%8D%E6%97%B6%E5%BA%8F%E5%92%8C%E6%B3%A2%E7%89%B9%E7%8E%87"><span class="toc-text">CAN位时序和波特率</span></a></li></ol>
       
     </div>
   </div>
