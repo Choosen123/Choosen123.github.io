@@ -446,6 +446,43 @@ void vApplicationMallocFailedHook( void );
       </tags>
   </entry>
   <entry>
+    <title>pi5-ImmortalWrt</title>
+    <url>/2025/pi5-ImmortalWrt/</url>
+    <content><![CDATA[刷入固件
+
+注：使用rpi-imager重刷固件时，必须刷写与之前不同格式的镜像(ext4、squashfs)。否则似乎并没有格式化。原因不清楚，如果在原有基础上升级？或者重刷，或许应该使用官方提供的另一款镜像？
+
+先不要插网线，启动树莓派。
+配置
+连接名为&quot;ImmortWrt&quot;的无线网，然后访问192.168.1.1进入管理界面。默认用户名root，密码passwd。
+
+将树莓派作为主路由，光猫处于桥接模式，引出网线插到树莓派网口接入WAN口,板载无线网卡作为LAN
+口供连接使用。树莓派同时负责拨号上网。
+配置LAN口
+
+
+注意设备的选择，选择无线
+ipv4地址决定了访问管理界面输入的网址
+
+配置WAN口
+
+
+选择PPPoE拨号，输入宽带密码(忘记编辑短信czkdmn发给10086重置密码)
+设备选择有线网卡
+听说关闭ipv6能提高网速？
+
+至此可保存一下，试试是否成功，然后可以插上网线了。
+配置无线接入点
+很简单。
+更改wifi名：
+
+更改wifi密码：
+
+注意：保存更改时，要重新连接到修改后的wifi才能修改成功。不然会在时间结束后弹出配置失败。
+安装插件待更新
+]]></content>
+  </entry>
+  <entry>
     <title>interrupt-management</title>
     <url>/2025/interrupt-management/</url>
     <content><![CDATA[中断注意事项
@@ -498,43 +535,6 @@ void vInterruptHandlingTask(void *pvParameters)&#123;    for(;;) &#123;        /
       <tags>
         <tag>FreeRTOS</tag>
       </tags>
-  </entry>
-  <entry>
-    <title>pi5-ImmortalWrt</title>
-    <url>/2025/pi5-ImmortalWrt/</url>
-    <content><![CDATA[刷入固件
-
-注：使用rpi-imager重刷固件时，必须刷写与之前不同格式的镜像(ext4、squashfs)。否则似乎并没有格式化。原因不清楚，如果在原有基础上升级？或者重刷，或许应该使用官方提供的另一款镜像？
-
-先不要插网线，启动树莓派。
-配置
-连接名为&quot;ImmortWrt&quot;的无线网，然后访问192.168.1.1进入管理界面。默认用户名root，密码passwd。
-
-将树莓派作为主路由，光猫处于桥接模式，引出网线插到树莓派网口接入WAN口,板载无线网卡作为LAN
-口供连接使用。树莓派同时负责拨号上网。
-配置LAN口
-
-
-注意设备的选择，选择无线
-ipv4地址决定了访问管理界面输入的网址
-
-配置WAN口
-
-
-选择PPPoE拨号，输入宽带密码(忘记编辑短信czkdmn发给10086重置密码)
-设备选择有线网卡
-听说关闭ipv6能提高网速？
-
-至此可保存一下，试试是否成功，然后可以插上网线了。
-配置无线接入点
-很简单。
-更改wifi名：
-
-更改wifi密码：
-
-注意：保存更改时，要重新连接到修改后的wifi才能修改成功。不然会在时间结束后弹出配置失败。
-安装插件待更新
-]]></content>
   </entry>
   <entry>
     <title>pid</title>
