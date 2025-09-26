@@ -149,7 +149,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2025-09-22 22:22:39
+          2025-09-26 17:31:31
         </span>
         
               <span class="post-tags">
@@ -205,7 +205,7 @@
 <p>广播通信： CAN总线采用广播通信方式，即发送的数据帧可以被总线上的所有节点接收。这种特性有助于信息的共享和同步，同时减少了系统的复杂性。</p>
 <h2 id="CAN位时序和波特率">CAN位时序和波特率</h2>
 <p>一个CAN网络需要规定一个通信的波特率，各节点都以相同的波特率进行数据通信。<br>
-为了实现位同步，CAN 协议把每一个数据位的时序分解成如图所示的SS 段、PTS 段、PBS1 段、PBS2段，这四段的长度加起来即为一个CAN数据位的长度。分解后最小的时间单位是Tq(time quantum，时间片)，而一个完整的位由8~25个Tq组成。</p>
+为了实现位同步，CAN 协议把每一个数据位的时序分解成如图所示的SS 段、PTS 段、PBS1 段、PBS2段，这四段的长度加起来即为一个CAN数据位的长度。分解后最小的时间单位是Tq(time quantum，时间量子)，而一个完整的位由8~25个Tq组成。</p>
 <p>Tq：tq由CAN控制器的时钟频率fcan决定。在STM32F407中，两个CAN控制器在APB1总线上，CAN控制器有预分频器，APB1总线的时钟信号PCLK1经分频后得到fcan。</p>
 <p><img src="/./can-bus/bit-time.png" alt="位时序" loading="lazy"><br>
 (总线电平并没有在一个位时序内发生数次电平变化！！！图有误导性)</p>
@@ -260,6 +260,33 @@ CAN不试图在单次重新同步中完全纠正所有偏差，而是通过多�
 <blockquote>
 <p>虽然严格来说同步调整确实会暂时改变位时长（影响瞬时波特率），但系统的整体通信速率仍由配置的波特率决定。</p>
 </blockquote>
+<h2 id="同步方法">同步方法</h2>
+<h3 id="硬同步">硬同步</h3>
+<p>硬同步是接收单元在总线空闲状态检测出帧起始时进行的同步调整。硬同步仅在消息帧的开头（SOF位）执行。 在空闲时段（帧间间隔（INTERFRAME SPACING）中的总线空闲）之后，网络上的每个CAN控制器都会在SYNC_SEG的第一个接收隐性到显性边沿时初始化其当前位周期时序。 随后在每个接收到的隐性到显性边沿的整个消息的剩余部分中执行一次重新同步。</p>
+<p>硬同步调整宽度不限。经过硬同步后，无论边沿相位误差如何，位时序都会在 Sync_Seg 结束时重新启动。因此，硬同步迫使硬同步的边沿位于重新启动的位时间的同步段内。</p>
+<p><img src="/./can-bus/hard-sync.png" alt="hard sync" loading="lazy"></p>
+<blockquote>
+<p>根据 CAN 规范，当总线空闲时总线为隐性电平。此时，节点 A 发送数据，在出现 SOF 时，总线上的其他节点（如节点 B）也会监控到该变化。但是，节点 B 会发现，自己当前位的 SS 段和发送节点 SOF 位的 SS 段不同步。此时，节点 B 将强制将自己 SOF 位的 SS 段拉到与节点 A 的 SOF 位的 SS 段同步。</p>
+</blockquote>
+<h3 id="重新同步">重新同步</h3>
+<p>在接收过程中检测出总线上的电平变化时进行的同步调整。 每当检测出<strong>1-&gt;0边沿</strong>时，根据 SJW 值通过加长 PBS1 段，或缩短 PBS2 段，以调整同步。但如果发生了超出 SJW 值的误差时，最大调整量不能超过 SJW 值。</p>
+<p><img src="/./can-bus/re-sync.jpg" alt="re-sync" loading="lazy"></p>
+<blockquote>
+<p>只用隐性→显性（1→0）这类边沿做同步锚点<br>
+同一个位内至多做一次重新同步（硬件会忽略该位里的后续边沿，以免过度调整）</p>
+</blockquote>
+<p>避免长时间没有同步锚点，can采用<em><strong>位填充规则</strong></em></p>
+<blockquote>
+<p>为什么会在“同一个位”（以接收端本地时钟划的位窗口）里看到边沿:</p>
+<ol>
+<li>发射端与接收端的位边界不完全对齐:<br>
+真正的电平翻转都发生在发射端的位边界上，但由于两端时钟误差与总线传播延时，这个翻转到达接收端时，可能落在接收端当前位的 PTS/PBS1/PBS2 内，而不是它期望的 SS 段里。从接收端视角，这就是“位内部出现了一个 1→0 边沿”，因此需要在“当前位内”做一次重新同步去追齐它。<br>
+物理层非理想导致“多次过阈” :</li>
+<li>反射/震荡：终端不匹配、支路过长、走线不当会引起振铃，差分电压在阈值附近来回晃，比较器可能先后多次从隐性判到显性、又回去。<br>
+EMI/噪声脉冲：外部干扰或地弹跳让总线瞬时叠加毛刺，短暂越过比较阈值，形成伪边沿。<br>
+缓慢边沿+噪声：上升/下降沿过慢时，叠加噪声更容易造成阈值抖动，出现“抖边”。</li>
+</ol>
+</blockquote>
 
       </div>
       
@@ -275,7 +302,7 @@ CAN不试图在单次重新同步中完全纠正所有偏差，而是通过多�
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2025-09-22 22:22:39
+              2025-09-26 17:31:31
             </span>
             
                   <span class="post-tags">
@@ -309,7 +336,7 @@ CAN不试图在单次重新同步中完全纠正所有偏差，而是通过多�
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC"><span class="toc-text">基本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CAN%E4%BD%8D%E6%97%B6%E5%BA%8F%E5%92%8C%E6%B3%A2%E7%89%B9%E7%8E%87"><span class="toc-text">CAN位时序和波特率</span></a></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC"><span class="toc-text">基本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CAN%E4%BD%8D%E6%97%B6%E5%BA%8F%E5%92%8C%E6%B3%A2%E7%89%B9%E7%8E%87"><span class="toc-text">CAN位时序和波特率</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E6%96%B9%E6%B3%95"><span class="toc-text">同步方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E5%90%8C%E6%AD%A5"><span class="toc-text">硬同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E6%96%B0%E5%90%8C%E6%AD%A5"><span class="toc-text">重新同步</span></a></li></ol></li></ol>
       
     </div>
   </div>
