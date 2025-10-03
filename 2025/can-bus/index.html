@@ -149,7 +149,7 @@
       <div class="post-attach">
         <span class="post-pubtime">
           <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-          2025-09-26 17:31:31
+          2025-10-03 15:53:11
         </span>
         
               <span class="post-tags">
@@ -287,6 +287,147 @@ EMI/噪声脉冲：外部干扰或地弹跳让总线瞬时叠加毛刺，短暂�
 缓慢边沿+噪声：上升/下降沿过慢时，叠加噪声更容易造成阈值抖动，出现“抖边”。</li>
 </ol>
 </blockquote>
+<h2 id="帧格式">帧格式</h2>
+<p>CAN2.0 Part B 规定了两种格式的帧，它们的 IDENTIFIER 域长度不同。带有 11 个比特位长的 IDENTIFIER 的帧被称为 标准帧（Standard Frames）；带有 29 个比特位长的 IDENTIFIER 的帧被称为 扩展帧（Extended Frames）。</p>
+<h3 id="数据帧-DATA-FRAME">数据帧 DATA FRAME</h3>
+<p>用于将数据发送到节点</p>
+<p><img src="/./can-bus/data-frame.png" alt="数据帧" loading="lazy"></p>
+<p>DATA FRAME 由 7 个不同的位域组成：帧起始(START OF FRAME)、ARBITRATION FIELD、CONTROL FIELD、DATA FIELD、CRC FIELD、ACK FIELD、END OF FRAME。 其中，DATA FIELD 长度可以为 0。</p>
+<h4 id="帧起始">帧起始</h4>
+<p>标志着数据帧和遥控帧的开始。占一个字节，必须为显性电平。<br>
+只在总线空闲(处于显性电平)时允许开始传输。硬同步调整依据。</p>
+<h4 id="仲裁域">仲裁域</h4>
+<ul>
+<li>标注格式<br>
+<img src="/./can-bus/standard-data-frame.png" alt="标注格式数据帧" loading="lazy"><br>
+<img src="/./can-bus/description-standard-data-frame.png" alt="解释" loading="lazy"></li>
+</ul>
+<p>仲裁域由 11 个比特位的 IDENTIFIER 和 1 个比特位的 RTR-BIT 组成。IDENTIFIER 位表示为 ID28 ~ ID18。<br>
+- IDENTIFIER： 长度为 11 个比特位， 对应于扩展格式的基本ID。 这些位按照从 ID28 ~ ID-18 的顺序发送。 最低位是 ID18。 7 个最重要的位（ID28 ~ ID22）不能全部为“隐性电平”。<br>
+- RTR BIT： 全称 Remote Transmission Request BIT。占 1 个比特位。在DATA FRAME中，RTR BIT 必须是显性电平。 在REMOTE FRAME内RTR BIT必须是隐性电平。</p>
+<ul>
+<li>扩展格式<br>
+<img src="/./can-bus/extended-frame.png" alt="扩展格式数据帧" loading="lazy"><br>
+<img src="/./can-bus/description-of-extended-frame.png" alt="解释" loading="lazy"><br>
+ARBITRATION FIELD由 29 个比特位的IDENTIFIER，1 个比特位的 SRR-Bit，1 个比特位的 IDE-Bit和 1 个比特位的RTR-BIT组成。 IDENTIFIER 位表示为ID28 ~ ID0。</li>
+<li>IDENTIFIER：由 29 个比特位组成。格式包括两部分：
+<ul>
+<li>Base ID： 由 11 个比特位组成。 它按照从 ID28 ~ ID18 的顺序传输。 它等同于标准标识符的格式。 Base ID 定义扩展帧的基本优先级。</li>
+<li>Extended ID： 由 18 个比特位组成。 它以 ID17 ~ ID0 的顺序发送。</li>
+</ul>
+</li>
+<li>SRR BIT： 全称 Substitute Remote Request BIT。占 1 个比特位隐性电平。此位的位置正好对应于标准格式的 RTR-BIT。对于数据帧，标准格式的 RTR-BIT 位为显性电平 。因此，标准格式的帧优先级高于扩展格式的帧(仲裁机制)！</li>
+<li>IDE BIT： 全称 Identifier Extension BIT。相对于标准格式的帧，该位正好对应于原来的 Control Field 的 第 1 个保留位。标准格式的 IDE 位传输为显性电平 （见下文说明），而在扩展格式中，IDE 位是隐性电平 。</li>
+<li>RTR BIT： 全称 Remote Transmission Request BIT。占 1 个比特位。在 DATA FRAME 中，RTR BIT 必须是 显性电平。 在 REMOTE FRAME 内 RTR BIT 必须是 隐性电平。与标准格式相同！</li>
+</ul>
+<h4 id="控制域">控制域</h4>
+<p>由6个比特位组成<br>
+<img src="/./can-bus/contrtol-field.png" alt="控制位" loading="lazy"><br>
+标准格式的帧包括 DATA LENGTH CODE，一个比特位的 IDE （必须为显性电平 ），以及一个比特位的保留位 r0。 扩展格式的帧包括 DATA LENGTH CODE 和 2 个比特位保留位 r1 和 r0。<br>
+保留位必须发送“显性”，但接收器在所有组合中接受“显性”和“隐性”位。</p>
+<blockquote>
+<p>发送端规则（必须发显性0）:要求所有当前兼容设备在发送时把保留位固定为 0，避免未定义用法流入网络、引发兼容性问题。这是“保守发送”的做法：现在没有定义的位，不要随便置 1。<br>
+接收端规则（接受 0 或 1）:接收时不要因为保留位看到 1 就判错或丢帧，而是“宽松接收”。这样未来如果标准把这些位赋予新意义（可能为 1），老设备也不会立刻用“形式错误”打断总线。<br>
+这是典型的“发送要保守、接收要宽松”（Postel’s Law）原则，目的就是前向/后向兼容</p>
+</blockquote>
+<p>DATA LENGTH CODE指示了数据域中字节数。4个比特位。<br>
+<img src="/./can-bus/data-length.png" alt="data length" loading="lazy"></p>
+<h4 id="数据域">数据域</h4>
+<p>数据，包含0～8个字节。MSB传输。</p>
+<h4 id="CRC域">CRC域</h4>
+<p>由 CRC SEQUENCE 和 CRC DELIMITER 两者组成。共占 16 个比特位（15 + 1）。<br>
+<img src="/./can-bus/CRC-field.png" alt="CRC" loading="lazy"></p>
+<ul>
+<li>CRC SEQUENCE： 多项式为 X15 + X14 + X10 + X8 + X7 + X4 + X3 + 1。计算范围：帧起始，仲裁字段，控制字段，数据字段（如果存在）</li>
+<li>CRC DELIMITER：必须为一个比特位的隐性电平</li>
+</ul>
+<h4 id="应答域">应答域</h4>
+<p>2个比特位。ACK SLOT和ACK DELIMITER各占一个。<br>
+<img src="/./can-bus/ACK-field.png" alt="ACK-field" loading="lazy"></p>
+<ul>
+<li>ACK SLOT： 发送器发送数据时，必须发送隐性电平。当接收器正确接收到数据（已经接收到匹配的 CRC SEQUENCE）后，接收器将 ACK SLOT 置为显性电平，将此情况报告给发送器</li>
+<li>ACK DELIMITER：必须一直是1个比特的隐性电平。</li>
+</ul>
+<h4 id="帧结束">帧结束</h4>
+<p>每个 DATA FRAME 和 REMOTE FRAME 由一个由 7 个比特位的隐性电平位组成的标志序列分隔。</p>
+<h3 id="远程帧">远程帧</h3>
+<p>通过发送 REMOTE FRAME，需要数据的节点可以请求另一节点发送相应的 DATA FRAME。<br>
+通常，数据传输是在数据源节点（例如传感器）发出数据帧的情况下自主执行的。但是，目标节点也可以通过发送远程帧来从信息源请求数据。</p>
+<p><img src="/./can-bus/remote-frame.png" alt="remote-frame" loading="lazy"><br>
+REMOTE FRAME 也分为标准格式 和 扩展格式，两者的区别与 DATA FRAME 完全相同。<br>
+与 DATA FRAME 相反，REMOTE FRAME 的 RTR 位是 1 个比特位的隐性电平。 没有 DATA FIELD、CONTROL FIELD 中的 DATA LENGTH CODE 字段表示所请求的消息的数据长度（可以是0 ~ 8），而不是发送的数据长度。</p>
+<h3 id="错误帧">错误帧</h3>
+<p>CAN 网络具有严格的错误诊断功能，该功能都是直接在 CAN 芯片中集成的，硬件直接处理整个过程。一旦错误被检测，正在传送的数据帧将会立即停止而待总线空闲时再次重发直至发送成功，该过程并不需要 CPU 的干涉除非错误累计该发送器退隐（Bus Off）。</p>
+<p>在发送或者接收报文时，总线上的节点如果检测出了错误，那么该节点就会发送 ERROR FRAME，以通知总线上的其他节点。ERROR FRAME 由 Error Flag 和 Error Delimiter 两个不同的位域组成。长度为 6 ~ 12个比特位的显性电平或者是隐性电平。</p>
+<blockquote>
+<p>错误节点状态<br>
+错误主动（Error Active）</p>
+<ul>
+<li>默认状态（上线即如此）</li>
+<li>TEC/REC（发送/接收错误计数器）都小于128</li>
+<li>行为：检测到错误时可发送&quot;主动错误标志&quot;（6个显性位）强制中断当前帧；可正常参与仲裁与发送，不需要额外等待</li>
+</ul>
+<p>错误被动（Error Passive）</p>
+<ul>
+<li>当TEC或REC ≥ 128时进入</li>
+<li>行为变化：
+<ul>
+<li>检测到错误时只能发送&quot;被动错误标志&quot;（6个隐性位），自身无法强制拉低总线中断帧</li>
+<li>发送新帧前需要额外等待一段&quot;挂起发送（Suspend Transmission）&quot;隐性时间（常见为在帧间隔之后再等8个隐性位），以减少对总线的打扰</li>
+<li>仍然需要对正确帧发送ACK</li>
+</ul>
+</li>
+</ul>
+<p>总线关闭（Bus-Off）</p>
+<ul>
+<li>当TEC ≥ 256时进入Bus-Off，节点退出总线，不再发送/ACK</li>
+<li>恢复条件由协议栈/芯片策略决定（如等待足够多次空闲段或软件复位）</li>
+</ul>
+<p>错误标志类型<br>
+主动错误标志（Active Error Flag）</p>
+<ul>
+<li>6个连续显性位（0）</li>
+<li>作用：利用&quot;显性覆盖隐性&quot;和&quot;位填充规则（5同位后必须插反位）&quot;制造非法比特模式，强制全网同时感知错误并中止正在传输的帧</li>
+<li>谁能发：仅&quot;错误主动&quot;状态的节点</li>
+</ul>
+<p>被动错误标志（Passive Error Flag）</p>
+<ul>
+<li>6个连续隐性位（1）</li>
+<li>作用：仅表明&quot;我检测到错误&quot;，但不拉低总线，不能保证形成非法模式，因此不能单独中断帧；需要有至少一个错误主动节点同时发主动错误标志才能真正打断</li>
+<li>谁会发：处于&quot;错误被动&quot;的节点</li>
+</ul>
+</blockquote>
+<p><img src="/./can-bus/error-frame.png" alt="error frame" loading="lazy"></p>
+<ul>
+<li>Error Flag： 是不同节点提供的错误标志（ERROR FLAG）的叠加。错误标志分为两种：
+<ul>
+<li>主动错误标志（ACTIVE ERROR FLAG）： 6 个比特位的显性电平，这将破坏“位填充”原则。由总线上错误状态为“主动错误”的出错的节点传送</li>
+<li>被动错误标志（PASSIVE ERROR FLAG）：6个比特位的隐性电平，由总线上错误状态为“被动错误”的出错的节点传送</li>
+<li>Error Delimiter：是错误界定符。8个比特位的隐性电平。在传输ERROR FLAG后，每个节点先发送1个比特位的隐性电平，然后监视总线，直到它检测到隐性电平之后(说明所有节点都完成了错误标志的发送)，它开始传输剩余7个比特位的隐性电平。</li>
+</ul>
+</li>
+</ul>
+<h3 id="过载帧">过载帧</h3>
+<p>过载帧是用于接收单元通知其尚未完成接收准备的帧。<br>
+<img src="/./can-bus/overload-frame.png" alt="overload frame" loading="lazy"></p>
+<ul>
+<li>OVERLOAD FRAME：6个比特的显性电平</li>
+<li>OVERLOAD DELIMITER：8个比特的隐性电平</li>
+</ul>
+<p>触发条件：</p>
+<ol>
+<li>接收节点需要延迟下一个数据帧或远程帧的传输（内部条件）</li>
+<li>在帧间空间（Interframe Space）的第一个或第二个比特位检测到显性电平</li>
+<li>接收节点在最后一个帧的EOF（End Of Frame）或另一个过载帧的过载界定符后检测到显性电平</li>
+</ol>
+<h3 id="帧间间隔">帧间间隔</h3>
+<p>DATA FRAME 和 REMOTE FRAME 与前面的帧（数据帧、远程帧、错误帧、过载帧）通过一个称为 INTERFRAME SPACING 的位字段分隔开。</p>
+<p><img src="/./can-bus/interframe-space.jpg" alt="interframe space" loading="lazy"></p>
+<ul>
+<li>INTERMISSION： 3 个比特位的隐性电平。在 INTERMISSION 期间，不允许任何节点发起 DATA FRAME 或 REMOTE FRAME 传输。 唯一可做的就是发出 OVERLOAD 条件。</li>
+<li>BUS IDLE： 可以是任意长度个比特位的隐性电平。总线被认为是空闲的时候，任何有东西要传输的节点都可以访问总线。如果在其他消息传输期间挂起了本消息，那么被挂起的消息必须在 INTERMISSION 的后一个比特位开始传输。总线上检测到的显性电平 的位可被解释为帧的起始。</li>
+<li>SUSPEND TRANSMISSION： “错误被动”节点发送消息后，在开始发送另一条消息或识别总线空闲之前，b必须发送 8 个比特位的隐性电平。如果与此同时另一节点开始发送消息，则错误被动节点转换为接受模式。</li>
+</ul>
 
       </div>
       
@@ -302,7 +443,7 @@ EMI/噪声脉冲：外部干扰或地弹跳让总线瞬时叠加毛刺，短暂�
           <div class="post-attach">
             <span class="post-pubtime">
               <i class="iconfont icon-updatetime mr-10" title="更新时间"></i>
-              2025-09-26 17:31:31
+              2025-10-03 15:53:11
             </span>
             
                   <span class="post-tags">
@@ -336,7 +477,7 @@ EMI/噪声脉冲：外部干扰或地弹跳让总线瞬时叠加毛刺，短暂�
     <div class="title">目录</div>
     <div class="catalog-content">
       
-        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC"><span class="toc-text">基本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CAN%E4%BD%8D%E6%97%B6%E5%BA%8F%E5%92%8C%E6%B3%A2%E7%89%B9%E7%8E%87"><span class="toc-text">CAN位时序和波特率</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E6%96%B9%E6%B3%95"><span class="toc-text">同步方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E5%90%8C%E6%AD%A5"><span class="toc-text">硬同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E6%96%B0%E5%90%8C%E6%AD%A5"><span class="toc-text">重新同步</span></a></li></ol></li></ol>
+        <ol class="toc"><li class="toc-item toc-level-2"><a class="toc-link" href="#%E7%BB%93%E6%9E%84"><span class="toc-text">结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%9F%BA%E6%9C%AC"><span class="toc-text">基本</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#CAN%E4%BD%8D%E6%97%B6%E5%BA%8F%E5%92%8C%E6%B3%A2%E7%89%B9%E7%8E%87"><span class="toc-text">CAN位时序和波特率</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%90%8C%E6%AD%A5%E6%96%B9%E6%B3%95"><span class="toc-text">同步方法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E7%A1%AC%E5%90%8C%E6%AD%A5"><span class="toc-text">硬同步</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%87%8D%E6%96%B0%E5%90%8C%E6%AD%A5"><span class="toc-text">重新同步</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#%E5%B8%A7%E6%A0%BC%E5%BC%8F"><span class="toc-text">帧格式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%B8%A7-DATA-FRAME"><span class="toc-text">数据帧 DATA FRAME</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%A7%E8%B5%B7%E5%A7%8B"><span class="toc-text">帧起始</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E4%BB%B2%E8%A3%81%E5%9F%9F"><span class="toc-text">仲裁域</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%8E%A7%E5%88%B6%E5%9F%9F"><span class="toc-text">控制域</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E6%95%B0%E6%8D%AE%E5%9F%9F"><span class="toc-text">数据域</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#CRC%E5%9F%9F"><span class="toc-text">CRC域</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%BA%94%E7%AD%94%E5%9F%9F"><span class="toc-text">应答域</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#%E5%B8%A7%E7%BB%93%E6%9D%9F"><span class="toc-text">帧结束</span></a></li></ol></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%9C%E7%A8%8B%E5%B8%A7"><span class="toc-text">远程帧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E9%94%99%E8%AF%AF%E5%B8%A7"><span class="toc-text">错误帧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%BF%87%E8%BD%BD%E5%B8%A7"><span class="toc-text">过载帧</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E5%B8%A7%E9%97%B4%E9%97%B4%E9%9A%94"><span class="toc-text">帧间间隔</span></a></li></ol></li></ol>
       
     </div>
   </div>
