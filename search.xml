@@ -291,6 +291,131 @@ taskENTER_CRITICAL()宏定义会关闭所有中断包括内核切换所在的中
       </tags>
   </entry>
   <entry>
+    <title>heap-and-stack</title>
+    <url>/2025/heap-and-stack/</url>
+    <content><![CDATA[freertos堆栈
+
+注意堆栈空间分配方向相反，若两区域相互覆盖会出现无法预料的问题。
+任务如何分配空间
+
+当调用创建任务api函数xTaskCreate()时，freertos会在堆中开辟出一片空间，用于存放任务控制信息TCB块和用于存储任务相关变量的栈区Stack。
+使用xTaskCreateStatic()在静态区创建任务
+TCB的大小构成
+TCB信息包括：任务当前执行到哪里了（程序计数器、堆栈指针）、任务的状态（运行、就绪、阻塞、挂起）、任务的优先级、任务的名字、任务等待的事件（比如信号量、队列、通知）等等。
+TCB的大小构成取决于FreeRTOSConfig.h头文件的设置，启用了哪些功能
+
+最小设置下96字节
+configUSE_TASK_NOTIFICATIONS是1，增加8字节
+configUSE_TRACE_FACILITY是1，增加8字节
+configUSE_MUTEXES是1,增加8字节
+
+
+
+
+参数
+含义
+目的
+
+
+
+
+configUSE_TASK_NOTIFICATIONS
+启用任务通知
+轻量级任务间通信/同步,一个任务可以给另一个任务“发通知”（设置通知值/状态），另一个任务可以“等待通知”（阻塞直到收到通知
+
+
+configUSE_TRACE_FACILITY
+启用跟踪调试设施
+系统调试分析（任务状态、事件）
+
+
+configUSE_MUTEXES
+启用互斥锁
+启用互斥锁
+
+
+
+MSP和PSP栈指针
+MSP主堆栈指针(Main stack pointer):
+
+系统启动时默认使用的堆栈指针
+用于处理中断和异常
+操作系统内核(如FreeRTOS内核)使用
+
+PSP进程堆栈指针(Process stack pointer)
+
+用于每个任务独立的栈指针
+每个FreeRTOS任务都有自己的PSP堆栈
+
+
+示例：
+
+
+系统启动：使用MSP初始化所有硬件和FreeRTOS
+
+
+任务切换：
+
+LED任务使用自己的PSP，包含其局部变量ledState
+温度任务使用自己的PSP，包含局部变量temperature和数组samples
+任务切换时，FreeRTOS保存当前PSP和恢复下一个任务的PSP
+
+
+
+中断处理：
+
+当按键中断发生时，无论哪个任务在运行，处理器立即切换到MSP
+中断处理完毕后，返回到被中断的任务（使用其PSP）或切换到更高优先级的任务
+
+
+
+内存池分配
+内存池分配是指在程序编译阶段就分配一定数量的内存块留作备用。当有新的内存需求时，就从内存块分出一部分内存块，若内存块不够了就继续申请新的内存。
+当FreeRTOS需要RAM的时候，它会调用pvPortMalloc这个函数而不是Malloc这个系统函数；当它需要释放内存的时候，会调用vPortFree这个函数而不是free这个系统函数。各提供了5种实现方案(heap_1.c,heap_2.c,heap_3.c,heap_4.c,heap_5.c),同时支持定制。stm32cubemx默认采用4。
+heap_1
+适用于小型嵌入式系统。且只能在调度器启动之前创建任务和其他内核对象。
+内存只需要在程序启动调度器前采用first fit算法对内存进行动态分配，之后任务的内存分配在程序的运行周期中保持不变并且无法被释放。
+确定性的，不会导致内存碎片化,执行时间固定。
+使用静态数组作为堆内存。数组大小由FreeRTOSConfig.h文件中ConfigTOTAL_HEAP_SIZE定义。
+xTaskCreate(myTask, &quot;Task1&quot;, 100, NULL, 1, NULL);xQueueCreate(10, sizeof(uint32_t));
+
+heap_2(不推荐使用？)
+内存管理也由一个数组实现，大小由FreeRTOSConfig.h文件中configTOTAL_HEAP_SIZE定义
+使用best fit算法对内存进行动态分配，允许释放内存。对大的内存块进行分割，但无法合并相连的内存块，容易导致内存的碎片化。
+void *buffer = pvPortMalloc(50);  // 分配50字节// 使用内存...vPortFree(buffer);  // 释放内存
+
+heap_3
+使用标准C库的malloc() free()函数
+添加了互斥锁使其线程安全，调用malloc函数和free函数的时候会临时挂起FreeRTOS的调度器。
+// 和标准C库函数名相同，但内部添加了互斥保护void *data = malloc(100);free(data);
+
+heap_4
+内存可以自由分配和合并空闲的内存块，并使得整体的性能最优。
+使用&quot;首次匹配&quot;算法（使用第一个足够大的空闲块）
+Heap_4的分配方案所需要时间是不确定性的，但速度要比malloc和free函数快。
+// 频繁分配释放也不会导致严重的内存碎片for(int i=0; i&lt;1000; i++) &#123;    void *temp = pvPortMalloc(random_size());    // 使用内存...    vPortFree(temp);&#125;
+
+heap_5
+类似于Heap_4的内存分配技术，但不同于Heap_4只用一个连续的数组表示堆，Heap_5可以用不同的数组空间对内存进行分配。要使用vPortDefineHeapRegions这个函数对不同的数组进行申明。
+// 初始化多区域内存// 添加内部SRAM区域HeapRegion_t xHeapRegions[] = &#123;    &#123; (uint8_t*)0x20000000, 0x10000 &#125;,  // 内部SRAM: 64KB    &#123; (uint8_t*)0x60000000, 0x80000 &#125;,  // 外部SRAM: 512KB    &#123; NULL, 0 &#125;  // 终止标记&#125;;vPortDefineHeapRegions(xHeapRegions);// 之后正常使用void *buffer = pvPortMalloc(1000);
+
+内存管理相关函数
+size_t xPortGetFreeHeapSize( void );
+这个函数会返回当前堆中的空闲空间大小（单位是字节），可以用来优化堆空间大小。比如在系统运行起来后调用xPortGetFreeHeapSize如果返回了3000字节，就可以把堆大小configTOTAL_HEAP_SIZE设置为3000字节多一点。
+size_t xPortGetMinimumEverFreeHeapSize( void );
+这个函数会返回在系统运行过程中堆空间的最小空闲空间，如果最小空闲空间很小的话可以考虑提高堆大小configTOTAL_HEAP_SIZE的值。这个函数只能在Heap_4或者Heap_5下调用。
+void vApplicationMallocFailedHook( void );
+这是一个回调函数，需要用户自己实现。如果配置文件中configUSE_MALLOC_FAILED_HOOK 设置为1的话，当堆分配内存失败时会调用此函数。用户可以在此函数中进行错误处理。
+]]></content>
+      <categories>
+        <category>嵌入式</category>
+        <category>FreeRTOS</category>
+      </categories>
+      <tags>
+        <tag>FreeRTOS</tag>
+      </tags>
+  </entry>
+  <entry>
     <title>can-bus</title>
     <url>/2025/can-bus/</url>
     <content><![CDATA[结构
@@ -608,131 +733,6 @@ ISR调用portYIELD_FROM_ISR(pdTRUE)强制任务切换
 
 一般还会搭配信号量，队列等机制来避免一直处于高优先级就绪态，阻塞其他任务执行。
 void vInterruptHandlingTask(void *pvParameters)&#123;    for(;;) &#123;        // 等待中断通知，这里任务进入阻塞态        // 只有当接收到通知时，任务才会变为就绪态        if(xSemaphoreTake(xInterruptSemaphore, portMAX_DELAY) == pdTRUE) &#123;                        // 处理中断相关的工作            ProcessInterrupt();                        // 处理完成后，循环回到开头，再次尝试获取信号量            // 如果没有新的中断发生，任务会再次阻塞在这里        &#125;    &#125;&#125;
-]]></content>
-      <categories>
-        <category>嵌入式</category>
-        <category>FreeRTOS</category>
-      </categories>
-      <tags>
-        <tag>FreeRTOS</tag>
-      </tags>
-  </entry>
-  <entry>
-    <title>heap-and-stack</title>
-    <url>/2025/heap-and-stack/</url>
-    <content><![CDATA[freertos堆栈
-
-注意堆栈空间分配方向相反，若两区域相互覆盖会出现无法预料的问题。
-任务如何分配空间
-
-当调用创建任务api函数xTaskCreate()时，freertos会在堆中开辟出一片空间，用于存放任务控制信息TCB块和用于存储任务相关变量的栈区Stack。
-使用xTaskCreateStatic()在静态区创建任务
-TCB的大小构成
-TCB信息包括：任务当前执行到哪里了（程序计数器、堆栈指针）、任务的状态（运行、就绪、阻塞、挂起）、任务的优先级、任务的名字、任务等待的事件（比如信号量、队列、通知）等等。
-TCB的大小构成取决于FreeRTOSConfig.h头文件的设置，启用了哪些功能
-
-最小设置下96字节
-configUSE_TASK_NOTIFICATIONS是1，增加8字节
-configUSE_TRACE_FACILITY是1，增加8字节
-configUSE_MUTEXES是1,增加8字节
-
-
-
-
-参数
-含义
-目的
-
-
-
-
-configUSE_TASK_NOTIFICATIONS
-启用任务通知
-轻量级任务间通信/同步,一个任务可以给另一个任务“发通知”（设置通知值/状态），另一个任务可以“等待通知”（阻塞直到收到通知
-
-
-configUSE_TRACE_FACILITY
-启用跟踪调试设施
-系统调试分析（任务状态、事件）
-
-
-configUSE_MUTEXES
-启用互斥锁
-启用互斥锁
-
-
-
-MSP和PSP栈指针
-MSP主堆栈指针(Main stack pointer):
-
-系统启动时默认使用的堆栈指针
-用于处理中断和异常
-操作系统内核(如FreeRTOS内核)使用
-
-PSP进程堆栈指针(Process stack pointer)
-
-用于每个任务独立的栈指针
-每个FreeRTOS任务都有自己的PSP堆栈
-
-
-示例：
-
-
-系统启动：使用MSP初始化所有硬件和FreeRTOS
-
-
-任务切换：
-
-LED任务使用自己的PSP，包含其局部变量ledState
-温度任务使用自己的PSP，包含局部变量temperature和数组samples
-任务切换时，FreeRTOS保存当前PSP和恢复下一个任务的PSP
-
-
-
-中断处理：
-
-当按键中断发生时，无论哪个任务在运行，处理器立即切换到MSP
-中断处理完毕后，返回到被中断的任务（使用其PSP）或切换到更高优先级的任务
-
-
-
-内存池分配
-内存池分配是指在程序编译阶段就分配一定数量的内存块留作备用。当有新的内存需求时，就从内存块分出一部分内存块，若内存块不够了就继续申请新的内存。
-当FreeRTOS需要RAM的时候，它会调用pvPortMalloc这个函数而不是Malloc这个系统函数；当它需要释放内存的时候，会调用vPortFree这个函数而不是free这个系统函数。各提供了5种实现方案(heap_1.c,heap_2.c,heap_3.c,heap_4.c,heap_5.c),同时支持定制。stm32cubemx默认采用4。
-heap_1
-适用于小型嵌入式系统。且只能在调度器启动之前创建任务和其他内核对象。
-内存只需要在程序启动调度器前采用first fit算法对内存进行动态分配，之后任务的内存分配在程序的运行周期中保持不变并且无法被释放。
-确定性的，不会导致内存碎片化,执行时间固定。
-使用静态数组作为堆内存。数组大小由FreeRTOSConfig.h文件中ConfigTOTAL_HEAP_SIZE定义。
-xTaskCreate(myTask, &quot;Task1&quot;, 100, NULL, 1, NULL);xQueueCreate(10, sizeof(uint32_t));
-
-heap_2(不推荐使用？)
-内存管理也由一个数组实现，大小由FreeRTOSConfig.h文件中configTOTAL_HEAP_SIZE定义
-使用best fit算法对内存进行动态分配，允许释放内存。对大的内存块进行分割，但无法合并相连的内存块，容易导致内存的碎片化。
-void *buffer = pvPortMalloc(50);  // 分配50字节// 使用内存...vPortFree(buffer);  // 释放内存
-
-heap_3
-使用标准C库的malloc() free()函数
-添加了互斥锁使其线程安全，调用malloc函数和free函数的时候会临时挂起FreeRTOS的调度器。
-// 和标准C库函数名相同，但内部添加了互斥保护void *data = malloc(100);free(data);
-
-heap_4
-内存可以自由分配和合并空闲的内存块，并使得整体的性能最优。
-使用&quot;首次匹配&quot;算法（使用第一个足够大的空闲块）
-Heap_4的分配方案所需要时间是不确定性的，但速度要比malloc和free函数快。
-// 频繁分配释放也不会导致严重的内存碎片for(int i=0; i&lt;1000; i++) &#123;    void *temp = pvPortMalloc(random_size());    // 使用内存...    vPortFree(temp);&#125;
-
-heap_5
-类似于Heap_4的内存分配技术，但不同于Heap_4只用一个连续的数组表示堆，Heap_5可以用不同的数组空间对内存进行分配。要使用vPortDefineHeapRegions这个函数对不同的数组进行申明。
-// 初始化多区域内存// 添加内部SRAM区域HeapRegion_t xHeapRegions[] = &#123;    &#123; (uint8_t*)0x20000000, 0x10000 &#125;,  // 内部SRAM: 64KB    &#123; (uint8_t*)0x60000000, 0x80000 &#125;,  // 外部SRAM: 512KB    &#123; NULL, 0 &#125;  // 终止标记&#125;;vPortDefineHeapRegions(xHeapRegions);// 之后正常使用void *buffer = pvPortMalloc(1000);
-
-内存管理相关函数
-size_t xPortGetFreeHeapSize( void );
-这个函数会返回当前堆中的空闲空间大小（单位是字节），可以用来优化堆空间大小。比如在系统运行起来后调用xPortGetFreeHeapSize如果返回了3000字节，就可以把堆大小configTOTAL_HEAP_SIZE设置为3000字节多一点。
-size_t xPortGetMinimumEverFreeHeapSize( void );
-这个函数会返回在系统运行过程中堆空间的最小空闲空间，如果最小空闲空间很小的话可以考虑提高堆大小configTOTAL_HEAP_SIZE的值。这个函数只能在Heap_4或者Heap_5下调用。
-void vApplicationMallocFailedHook( void );
-这是一个回调函数，需要用户自己实现。如果配置文件中configUSE_MALLOC_FAILED_HOOK 设置为1的话，当堆分配内存失败时会调用此函数。用户可以在此函数中进行错误处理。
 ]]></content>
       <categories>
         <category>嵌入式</category>
@@ -1089,99 +1089,6 @@ colcon test
       </tags>
   </entry>
   <entry>
-    <title>ros2-communication</title>
-    <url>/2025/ros2-communication/</url>
-    <content><![CDATA[接口
-接口：通信时使用的数据载体（特定的格式），由接口文件定义
-
-msg文件：用于话题通信，
-srv文件：用于服务通信
-action文件：用于动作通信
-
-参数通信不使用，操作参数对象
-
-话题通信：
-基于发布订阅模式
-除了一个节点发布，一个节点接受的形式外，ROS2话题通信其实还可以是1对n, n对1, n对n的，1对n
-
-发布者：
-#include &lt;rclcpp/rclcpp.hpp&gt;#include &quot;std_msgs/msg/string.hpp&quot;using namespace std::chrono_literals;//1s 代表一秒 std::chrono::seconds(1)class Talker :public rclcpp::Node&#123;public:  //将节点命名为talker,初始化count  Talker() :Node(&quot;talker&quot;),count(0))&#123;    //打印日志，说明节点被创建    RCLCPP_INFO(this-&gt;get_logger(),&quot;a talker created&quot;);    //创建一个发布者  话题为chat   队列长为10    publisher_ = this-&gt;create_publisher&lt;std_msgs::msg::String&gt;(&quot;chat&quot;,10);    //创建一个每隔1秒触发一次的定时器，并将定时器的回调函数设置为当前对象的on_timer成员函数    timer_ =  this-&gt;create_wall_timer(1s,std::bind(&amp;Talker::on_timer,this));  &#125;private:  //创建一个定时器的指针  rclcpp::TimerBase::SharedPtr timer_ ;    //创建一个发布string类型数据的成员指针  rclcpp::Publisher&lt;std_msgs::msg::String&gt;::SharedPtr publisher_;  //无符号长整型  size_t count;  void on_timer()&#123;    //创建一个String类的实例    //局部变量！！！！每次创建一个新的，函数结束后销毁，不会资源浪费    //也可以在函数外部预定义    auto message = std_msgs::msg::String();    //to_string 转化成字符串    message.data = &quot;hello world!&quot; + std::to_string(count++);    //    RCLCPP_INFO(this-&gt;get_logger(),&quot;发布者发布消息：%s&quot;,message.data.c_str());    //publish：这是rclcpp::Publisher类的一个成员函数，用于发布消息。    //这个函数接受一个消息对象作为参数，并将其发送到指定的主题上。    publisher_-&gt;publish(message);  &#125; &#125;;int main(int argc, char ** argv)&#123;  //初始化rcl客户端  rclcpp::init(argc,argv);  //回旋，一直执行回调函数，直到节点被关闭  //std::make_shared&lt;T&gt;() 是一个模板函数，用于创建一个std::shared_ptr&lt;T&gt;对象。它不仅创建了一个共享指针，还同时创建了一个T类型的对象实例。  rclcpp::spin(std::make_shared&lt;Talker&gt;());  //释放资源  rclcpp::shutdown();  return 0;&#125;
-
-订阅方
-
-回调函数传入参数类型不能是std_msgs::msg::String的引用
-create_subscription方法传递的是消息的共享指针，而不是消息的引用。正确的参数类型应该是const std_msgs::msg::String::SharedPtr
-#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;std_msgs/msg/string.hpp&gt;class Listener : public rclcpp::Node&#123;public:    Listener() : Node(&quot;listener_node_cpp&quot;)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;订阅者已创建&quot;);        //接收到信息就执行回调函数        //create_subscription函数的作用是创建一个订阅者（subscriber），该订阅者会监听指定主题（topic）上的消息。        //当有消息发布到该主题时，create_subscription会将接收到的消息传递给指定的回调函数（callback function）。        subscription_ = this-&gt;create_subscription&lt;std_msgs::msg::String&gt;(&quot;chat&quot;,10,std::bind(&amp;Listener::do_cb,this,std::placeholders::_1));    &#125;private:    //注意传入消息类型    void do_cb(const std_msgs::msg::String::SharedPtr message)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;订阅到的消息是：%s&quot;,message-&gt;data.c_str());    &#125;        rclcpp::Subscription&lt;std_msgs::msg::String&gt;::SharedPtr subscription_;&#125;;int main(int argc, char** argv)&#123;    rclcpp::init(argc,argv);    rclcpp::spin(std::make_shared&lt;Listener&gt;());    rclcpp::shutdown();    return 0;&#125;
-
-生成代码片段
-左下角设置——代码片段——cpp
-
-自定义接口文件——编译前保存！！！！
-文件名首字母大写
-xml文件配置
-&lt;!-- 编译依赖--&gt;  &lt;build_depend&gt;&lt;/build_depend&gt;    &lt;!--执行依赖 --&gt;  &lt;exec_depend&gt;&lt;/exec_depend&gt;    &lt;!--声明当前包所属功能包组 --&gt;  &lt;member_of_group&gt;&lt;/member_of_group&gt;
-ros2 pkg list | grep -i NAME         筛选出来，不用记
-
-CMakeLists.txt
-find_package(rosidl_default_generators REQUIRED)rosidl_generate_interfaces(  $&#123;PROJECT_NAME&#125;  &quot;msg/Student.msg&quot;)
-
-使用自定义接口文件要包含路径
-#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;base_interfaces_demo/msg/student.hpp&gt;    using namespace std::chrono_literals;//1s 代表一秒 std::chrono::seconds(1)using base_interfaces_demo::msg::Student;class TalkerStu :public rclcpp::Node&#123;public:    TalkerStu() :Node(&quot;talker_stu&quot;)&#123;        publisher_ = this-&gt;create_publisher&lt;Student&gt;(&quot;Student&quot;,10);        timer_ = this-&gt;create_wall_timer(1s,std::bind(&amp;TalkerStu::callback,this));    &#125;private:    rclcpp::Publisher&lt;Student&gt;::SharedPtr publisher_;     rclcpp::TimerBase::SharedPtr timer_;    Student stu;    void callback()&#123;        stu.name  = &quot;lihua&quot;;        stu.age = 12;        stu.height = 180.0;        publisher_-&gt;publish(stu);        RCLCPP_INFO(this-&gt;get_logger(),&quot;发布消息：%s,%d,%lf&quot;,stu.name.c_str(),stu.age,stu.height);    &#125;&#125;;int main(int argc,char **argv)&#123;    rclcpp::init(argc,argv);    rclcpp::spin(std::make_shared&lt;TalkerStu&gt;());    rclcpp::shutdown();    return 0;&#125;
-#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;base_interfaces_demo/msg/student.hpp&gt;using base_interfaces_demo::msg::Student;using namespace std::chrono_literals;class ListenerStu :public rclcpp::Node&#123;public:    ListenerStu() :Node(&quot;listener_stu&quot;)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;订阅者已创建&quot;);        subscription_ = this-&gt;create_subscription&lt;Student&gt;(&quot;Student&quot;,10,std::bind(&amp;ListenerStu::callback,this,std::placeholders::_1));       &#125;private:    rclcpp::Subscription&lt;Student&gt;::SharedPtr subscription_;    void callback(const Student::SharedPtr message)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;订阅者已接收：%s,%d,%lf&quot;,message-&gt;name.c_str(),message-&gt;age,message-&gt;height);    &#125;&#125;;int main(int argc,char **argv)&#123;    rclcpp::init(argc,argv);            rclcpp::shutdown();    return 0;&#125;
-
-服务通信
-一对多，一个服务端，多个客户端
-自定义接口文件
-请求数据  ---  响应数据  
-在之前的基础上，修改CMakeLists.txt  ——rosidl_generate_interfaces即可
-服务端
-#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;base_interfaces_demo/srv/addints.hpp&gt;using base_interfaces_demo::srv::Addints;using std::placeholders::_1;using std::placeholders::_2;class AddIntServer :public rclcpp::Node&#123;public:  AddIntServer() :Node(&quot;add_int_server&quot;)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;服务端节点创建成功&quot;);      service_ = this-&gt;create_service&lt;Addints&gt;(&quot;add_ints&quot;,std::bind(&amp;AddIntServer::sum,this,_1,_2));  &#125;private:  rclcpp::Service&lt;Addints&gt;::SharedPtr service_;  void sum(const Addints::Request::SharedPtr req,const Addints::Response::SharedPtr res)&#123;    res-&gt;sum = req-&gt;num1 + req-&gt;num2;    RCLCPP_INFO(this-&gt;get_logger(),&quot;%d + %d = %d&quot;,req-&gt;num1,req-&gt;num2,res-&gt;sum);  &#125;&#125;;int main(int argc,char **argv)&#123;  rclcpp::init(argc,argv);    rclcpp::spin(std::make_shared&lt;AddIntServer&gt;());  rclcpp::shutdown();  return 0;&#125;
-测试：
-ros2 service call /add_ints base_interfaces_demo/srv/Addints “&#123;'num1':10,'num2':30&#125;&quot;
-rclcpp::ok();
-rclcpp::get_logger();     不依赖于context
-
-客户端
-main函数中需要判断提交参数是否正确
-自定义节点类中要包括 判断是否连接到服务端
-#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;base_interfaces_demo/srv/addints.hpp&gt;using base_interfaces_demo::srv::Addints;using namespace std::chrono_literals;class AddIntClient :public rclcpp::Node &#123;public:    AddIntClient() :Node(&quot;add_int_client&quot;)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;客户端节点创建&quot;);        client_ = this-&gt;create_client&lt;Addints&gt;(&quot;add_ints&quot;);    &#125;   //连接服务器   bool connect_server()&#123;      //以1s为超时时间，连接不上，一直连接        while(!client_ -&gt; wait_for_service(1s))&#123;            //rclcpp::ok()函数来检查ROS 2节点是否仍在运行            //如果节点被请求停止（例如，通过按下Ctrl+C），rclcpp::ok()会返回false            if(!rclcpp::ok())&#123;                RCLCPP_INFO(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;强制退出&quot;);                return false;            &#125;            RCLCPP_INFO(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;服务器连接中&quot;);        &#125;        return true;          &#125;    //发送请求函数    //参数两个整形数据 返回服务器处理后的结果    rclcpp::Client&lt;Addints&gt;::SharedFuture send_request(int num1,int num2)&#123;        auto request = std::make_shared&lt;Addints::Request&gt;();        request-&gt;num1 = num1;        request-&gt;num2 = num2;       //rclcpp::Client&lt;base_interfaces_demo::srv::Addints&gt;::SharedFuture        //async_send_request(std::shared_ptr&lt;base_interfaces_demo::srv::Addints_Request&gt; request)                return client_-&gt;async_send_request(request);    &#125;private:    rclcpp::Client&lt;Addints&gt;::SharedPtr  client_;&#125;;int main(int argc,char **argv)&#123;    if(argc != 3)&#123;        RCLCPP_ERROR(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;请提交两个整型数据&quot;);        return 1;    &#125;    rclcpp::init(argc,argv);    auto client = std::make_shared&lt;AddIntClient&gt;();    bool flag = client-&gt;connect_server();    //判断是否链接上服务器    if(!flag)&#123;        RCLCPP_INFO(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;服务器连接失败&quot;);        return 0;    &#125;    //调用请求提交函数，接收并处理响应结果    auto future = client-&gt;send_request(atoi(argv[1]),atoi(argv[2]));        //处理响应    if(rclcpp::spin_until_future_complete(client,future) == rclcpp::FutureReturnCode::SUCCESS)&#123;        RCLCPP_INFO(client-&gt;get_logger(),&quot;响应成功!sum = %d&quot;,future.get()-&gt;sum);    &#125;else&#123;        RCLCPP_INFO(client-&gt;get_logger(),&quot;sd&quot;);    &#125;        rclcpp::shutdown();    return 0;&#125;
-
-动作通信
-自定义接口文件
-请求数据  ---   响应数据  ---   反馈数据  
-xml：
-&lt;!-- action补充--&gt;  &lt;buildtool_depend&gt;rosidl_default_generators&lt;/buildtool_depend&gt;  &lt;depend&gt;action_msgs&lt;/depend&gt;
-CMakeLists.txt补充rosidl_generate_interfaces
-服务端
-ros2 action send_goal /get_sum base_interfaces_demo/action/Progress -f &quot;&#123;'num':10&#125;&quot;
-rclcpp::Rate 的构造函数接受一个频率值（单位为 Hz），表示每秒执行的次数。例如：
-rclcpp::Rate rate(1.0);  // 每秒执行 1 次，即每秒运行一次循环
-rate.sleep() 方法来暂停代码的执行，直到下一次循环的时间点。如果当前循环提前完成，rate.sleep() 会阻塞当前线程，直到达到预期的频率。
-#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;rclcpp_action/rclcpp_action.hpp&gt;#include &lt;base_interfaces_demo/action/progress.hpp&gt;using base_interfaces_demo::action::Progress;using std::placeholders::_1;using std::placeholders::_2;class ActionService :public rclcpp::Node&#123;public:  ActionService() :Node(&quot;action_service&quot;)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;服务器已创建!&quot;);        //rclcpp_action::Server&lt;ActionT&gt;::SharedPtr     //create_server&lt;ActionT, NodeT&gt;    //(NodeT node,     //const std::string &amp;name,     //rclcpp_action::Server&lt;ActionT&gt;::GoalCallback handle_goal,     //rclcpp_action::Server&lt;ActionT&gt;::CancelCallback handle_cancel,     //rclcpp_action::Server&lt;ActionT&gt;::AcceptedCallback handle_accepted,    // const rcl_action_server_options_t &amp;options = rcl_action_server_get_default_options(), rclcpp::CallbackGroup::SharedPtr group = nullptr)//All provided callback functions must be non-blocking.    server_ = rclcpp_action::create_server&lt;Progress&gt;(      this,      &quot;get_sum&quot;,     std::bind(&amp;ActionService::handle_goal,this,_1,_2),     std::bind(&amp;ActionService::handle_cancel,this,_1),     std::bind(&amp;ActionService::handle_accepted,this,_1)     );  &#125;private:  rclcpp_action::Server&lt;Progress&gt;::SharedPtr server_;  //处理提交的目标值，注意参数  rclcpp_action::GoalResponse handle_goal(const rclcpp_action::GoalUUID&amp; uuid,std::shared_ptr&lt;const Progress::Goal&gt; goal)&#123;    //判断提交的数字是否大于1，大于接受，小于拒绝    if(goal-&gt;num &lt;= 1)&#123;      RCLCPP_INFO(this-&gt;get_logger(),&quot;提交数据小于1&quot;);      return rclcpp_action::GoalResponse::REJECT;    &#125;    RCLCPP_INFO(this-&gt;get_logger(),&quot;提交数据合法&quot;);    return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;  &#125;  //处理取消请求  //客户端可发送取消请求  rclcpp_action::CancelResponse handle_cancel(std::shared_ptr&lt;rclcpp_action::ServerGoalHandle&lt;Progress&gt;&gt; goal_handle)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;任务已取消&quot;);    return rclcpp_action::CancelResponse::ACCEPT;  &#125;  //生成连续反馈和最终响应  void execute(std::shared_ptr&lt;rclcpp_action::ServerGoalHandle&lt;Progress&gt;&gt; goal_handle)&#123;    //生成连续反馈给客户端 goal_handle-&gt;publish_feedback()    //void publish_feedback(std::shared_ptr&lt;base_interfaces_demo::action::Progress_Feedback&gt; feedback_msg)    //首先获取目标值，遍历然后累加，每循环一次计算进度，作为连续反馈发布    int num = goal_handle-&gt;get_goal()-&gt;num;    int sum=0;    double progress;    auto feedback = std::make_shared&lt;Progress::Feedback&gt;();    auto result = std::make_shared&lt;Progress::Result&gt;();    //设置休眠,1s一次    rclcpp::Rate rate(1.0);    for(int i = 1;i&lt;=num;i++)&#123;      sum+=i;      progress = i / (double)num;      feedback-&gt;progress = progress;      goal_handle-&gt;publish_feedback(feedback);      RCLCPP_INFO(this-&gt;get_logger(),&quot;连续反馈中，进度：%.2f&quot;,progress);      //判断是否接收到了取消请求      //true——接收到取消请求      if(goal_handle-&gt;is_canceling())&#123;              //canceled(std::shared_ptr&lt;base_interfaces_demo::action::Progress_Result&gt; result_msg)        //取消时发送最终结果        result-&gt;sum = sum;        goal_handle-&gt;canceled(result);        RCLCPP_INFO(this-&gt;get_logger(),&quot;反馈取消，结果：%d&quot;,sum);                return ;      &#125;      rate.sleep();    &#125;    //生成最终响应结果 goal_handle-&gt;succeed()    //void succeed(std::shared_ptr&lt;base_interfaces_demo::action::Progress_Result&gt; result_msg)    if(rclcpp::ok())&#123;      result-&gt;sum = sum;      goal_handle-&gt;succeed(result);      RCLCPP_INFO(this-&gt;get_logger(),&quot;最终响应结果：%d&quot;,sum);    &#125;  &#125;  void handle_accepted(std::shared_ptr&lt;rclcpp_action::ServerGoalHandle&lt;Progress&gt;&gt; goal_handle)&#123;    //新建子线程处理耗时的主逻辑实现    std::thread(std::bind(&amp;ActionService::execute,this,goal_handle)).detach();  &#125;&#125;;int main(int argc,char **argv)&#123;  rclcpp::init(argc,argv);  rclcpp::spin(std::make_shared&lt;ActionService&gt;());    rclcpp::shutdown();  return 0;&#125;
-
-客户端
-#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;rclcpp_action/rclcpp_action.hpp&gt;#include &lt;base_interfaces_demo/action/progress.hpp&gt;using base_interfaces_demo::action::Progress;using namespace std::chrono_literals;using std::placeholders::_1;using std::placeholders::_2;class ActionClient :public rclcpp::Node&#123;public:   ActionClient() :Node(&quot;action_client&quot;)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;Action 客户端已创建&quot;);    //rclcpp::CallbackGroup::SharedPtr group = nullptr)    client_ = rclcpp_action::create_client&lt;Progress&gt;(this,&quot;get_sum&quot;);   &#125;    void send(int num)&#123;        //1.连接到服务器        if(!client_-&gt;wait_for_action_server(10s))&#123;            RCLCPP_ERROR(this-&gt;get_logger(),&quot;服务器连接失败！&quot;);            return ;        &#125;        //2.发送请求               auto goal = Progress::Goal();        auto options = rclcpp_action::Client&lt;Progress&gt;::SendGoalOptions();        goal.num = num;         options.feedback_callback = std::bind(&amp;ActionClient::feedback_callback,this,_1,_2);        options.goal_response_callback = std::bind(&amp;ActionClient::goal_response_callback,this,_1);        options.result_callback = std::bind(&amp;ActionClient::result_callback,this,_1);        auto future = client_-&gt;async_send_goal(goal,options);    &#125;    void feedback_callback(rclcpp_action::ClientGoalHandle&lt;Progress&gt;::SharedPtr goal_handle,const std::shared_ptr&lt;const Progress::Feedback&gt; feedback)&#123;        double progress = feedback-&gt;progress;        RCLCPP_INFO(this-&gt;get_logger(),&quot;进度：%lf&quot;,progress);    &#125;        //处理关于目标值的服务端响应    void goal_response_callback(std::shared_future&lt;rclcpp_action::ClientGoalHandle&lt;Progress&gt;::SharedPtr&gt; goal_handle)&#123;        //响应成功返回指针,注意！！！        if(!goal_handle.get())&#123;            RCLCPP_INFO(this-&gt;get_logger(),&quot;请求被拒绝&quot;);        &#125;else&#123;            RCLCPP_INFO(this-&gt;get_logger(),&quot;请求成功&quot;);        &#125;    &#125;    void result_callback(const rclcpp_action::ClientGoalHandle&lt;Progress&gt;::WrappedResult &amp;result)&#123;        //result.code 状态码判断最终结果状态 状态玛封装在rclcpp_action::ResultCode::        if(result.code == rclcpp_action::ResultCode::SUCCEEDED)&#123;            RCLCPP_INFO(this-&gt;get_logger(),&quot;成功！，结果：%d&quot;,result.result-&gt;sum);        &#125;else&#123;            RCLCPP_ERROR(this-&gt;get_logger(),&quot;失败!&quot;);        &#125;    &#125;private:    rclcpp_action::Client&lt;Progress&gt;::SharedPtr client_;&#125;;int main(int argc,char **argv)&#123;    if(argc !=2 )&#123;        RCLCPP_ERROR(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;请提交一个整型数据！&quot;);        return 1;    &#125;    rclcpp::init(argc,argv);    auto node = std::make_shared&lt;ActionClient&gt;();        node-&gt;send(atoi(argv[1]));    rclcpp::spin(node);    rclcpp::shutdown();    return 0;&#125;
-
-参数通信
-
-
-ros2 param list
-查询参数
-ros2 param get my_server wheels
-查询参数值
-服务端
-#include &lt;rclcpp/rclcpp.hpp&gt;class MyServer :public rclcpp::Node&#123;public:  //如果允许删除参数，需要通过NodeOptions配置  MyServer() :Node(&quot;my_server&quot;,rclcpp::NodeOptions().allow_undeclared_parameters(true))&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;参数服务器已建立&quot;);  &#125;  void declare()&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;------------增-----------&quot;);    this-&gt;declare_parameter(&quot;car_type&quot;,&quot;tiger&quot;);    this-&gt;declare_parameter(&quot;width&quot;,1.5);    this-&gt;declare_parameter(&quot;wheels&quot;,5);        //set也可以，但必须rclcpp::NodeOptions().allow_undeclared_parameters(true)    this-&gt;set_parameter(rclcpp::Parameter(&quot;height&quot;,1.8));  &#125;  void get()&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;------------查-----------&quot;);    //指定    auto car = this-&gt;get_parameter(&quot;car_type&quot;);    RCLCPP_INFO(this-&gt;get_logger(),&quot;key = %s , value = %s&quot;,car.get_name().c_str(),car.as_string().c_str());    //一些    auto params = this-&gt;get_parameters(&#123;&quot;car_type&quot;,&quot;width&quot;,&quot;wheels&quot;&#125;);    for(rclcpp::Parameter n : params)&#123;      RCLCPP_INFO(this-&gt;get_logger(),&quot;key = %s , value = %s&quot;,n.get_name().c_str(),n.value_to_string().c_str());         //判断是否含有      RCLCPP_INFO(this-&gt;get_logger(),&quot;是否包含%s? %d&quot;,n.get_name().c_str(),this-&gt;has_parameter(n.get_name()));    &#125;  &#125;  void update()&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;------------改-----------&quot;);    this-&gt;set_parameter(rclcpp::Parameter(&quot;width&quot;,1.4));    RCLCPP_INFO(this-&gt;get_logger(),&quot;width = %lf&quot;,this-&gt;get_parameter(&quot;width&quot;).as_double());  &#125;  void del()&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;------------删-----------&quot;);    this-&gt;undeclare_parameter(&quot;car_type&quot;);    RCLCPP_INFO(this-&gt;get_logger(),&quot;car_type还存在吗? %d&quot;,this-&gt;has_parameter(&quot;car_type&quot;));  &#125;private:&#125;;int main(int argc,char **argv)&#123;  rclcpp::init(argc,argv);    auto node = std::make_shared&lt;MyServer&gt;();  node-&gt;declare();  node-&gt;get();  node-&gt;update();  node-&gt;del();  rclcpp::spin(node);  rclcpp::shutdown();  return 0;&#125;
-
-客户端
-#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;vector&gt;using namespace std::chrono_literals;class MyClient :public rclcpp::Node&#123;public:    MyClient() :Node(&quot;my_client&quot;)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;参数客户端已建立&quot;);    client_ = std::make_shared&lt;rclcpp::SyncParametersClient&gt;(this,&quot;my_server&quot;);    &#125;    bool connect_server()&#123;                while(!client_-&gt;wait_for_service(1s))&#123;                        if(!rclcpp::ok())&#123;                RCLCPP_INFO(this-&gt;get_logger(),&quot;中断!&quot;);                return false;            &#125;                        RCLCPP_INFO(this-&gt;get_logger(),&quot;连接中&quot;);                &#125;        return true;    &#125;    void get()&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;获取&quot;);                //获取单个        std::string car_name =client_-&gt;get_parameter&lt;std::string&gt;(&quot;car_type&quot;);        double width = client_-&gt;get_parameter&lt;double&gt;(&quot;width&quot;);        RCLCPP_INFO(this-&gt;get_logger(),&quot;car_name:%s&quot;,car_name.c_str());        RCLCPP_INFO(this-&gt;get_logger(),&quot;width:%lf&quot;,width);        //获取多个        auto params = client_-&gt;get_parameters(&#123;&quot;car_type&quot;,&quot;width&quot;&#125;);        for(rclcpp::Parameter  n : params)&#123;            RCLCPP_INFO(this-&gt;get_logger(),&quot;key = %s , value = %s&quot;,n.get_name().c_str(),n.value_to_string().c_str());        &#125;        //判断是否含有_IN        RCLCPP_INFO(this-&gt;get_logger(),&quot;car_type? %d&quot;,client_-&gt;has_parameter(&quot;car_type&quot;));    &#125;     void update()&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;修改&quot;);        client_-&gt;set_parameters(&#123;rclcpp::Parameter(&quot;car_type&quot;,&quot;pig&quot;),        rclcpp::Parameter(&quot;length&quot;,&quot;5.0&quot;)&#125;);//不存在也可以，但要保证服务端那个参数        RCLCPP_INFO(this-&gt;get_logger(),&quot;length? %d&quot;,client_-&gt;has_parameter(&quot;length&quot;));    &#125;private:    rclcpp::SyncParametersClient::SharedPtr client_;&#125;;int main(int argc,char **argv)&#123;    rclcpp::init(argc,argv);    auto note = std::make_shared&lt;MyClient&gt;();        bool flag = note-&gt;connect_server();    if(!flag == true)&#123;        return 0;    &#125;    note-&gt;get();    note-&gt;update();    note-&gt;get();    rclcpp::spin(note);    rclcpp::shutdown();    return 0;&#125;
-
-出现乱码：C语言字符串输出不兼容
-]]></content>
-      <tags>
-        <tag>ros2</tag>
-      </tags>
-  </entry>
-  <entry>
     <title>software-timer</title>
     <url>/2025/software-timer/</url>
     <content><![CDATA[软件定时器和硬件定时器
@@ -1349,6 +1256,99 @@ void vTimerCallback(TimerHandle_t xTimer)&#123;void *pvID = pvTimerGetTimerID(xT
       </categories>
       <tags>
         <tag>FreeRTOS</tag>
+      </tags>
+  </entry>
+  <entry>
+    <title>ros2-communication</title>
+    <url>/2025/ros2-communication/</url>
+    <content><![CDATA[接口
+接口：通信时使用的数据载体（特定的格式），由接口文件定义
+
+msg文件：用于话题通信，
+srv文件：用于服务通信
+action文件：用于动作通信
+
+参数通信不使用，操作参数对象
+
+话题通信：
+基于发布订阅模式
+除了一个节点发布，一个节点接受的形式外，ROS2话题通信其实还可以是1对n, n对1, n对n的，1对n
+
+发布者：
+#include &lt;rclcpp/rclcpp.hpp&gt;#include &quot;std_msgs/msg/string.hpp&quot;using namespace std::chrono_literals;//1s 代表一秒 std::chrono::seconds(1)class Talker :public rclcpp::Node&#123;public:  //将节点命名为talker,初始化count  Talker() :Node(&quot;talker&quot;),count(0))&#123;    //打印日志，说明节点被创建    RCLCPP_INFO(this-&gt;get_logger(),&quot;a talker created&quot;);    //创建一个发布者  话题为chat   队列长为10    publisher_ = this-&gt;create_publisher&lt;std_msgs::msg::String&gt;(&quot;chat&quot;,10);    //创建一个每隔1秒触发一次的定时器，并将定时器的回调函数设置为当前对象的on_timer成员函数    timer_ =  this-&gt;create_wall_timer(1s,std::bind(&amp;Talker::on_timer,this));  &#125;private:  //创建一个定时器的指针  rclcpp::TimerBase::SharedPtr timer_ ;    //创建一个发布string类型数据的成员指针  rclcpp::Publisher&lt;std_msgs::msg::String&gt;::SharedPtr publisher_;  //无符号长整型  size_t count;  void on_timer()&#123;    //创建一个String类的实例    //局部变量！！！！每次创建一个新的，函数结束后销毁，不会资源浪费    //也可以在函数外部预定义    auto message = std_msgs::msg::String();    //to_string 转化成字符串    message.data = &quot;hello world!&quot; + std::to_string(count++);    //    RCLCPP_INFO(this-&gt;get_logger(),&quot;发布者发布消息：%s&quot;,message.data.c_str());    //publish：这是rclcpp::Publisher类的一个成员函数，用于发布消息。    //这个函数接受一个消息对象作为参数，并将其发送到指定的主题上。    publisher_-&gt;publish(message);  &#125; &#125;;int main(int argc, char ** argv)&#123;  //初始化rcl客户端  rclcpp::init(argc,argv);  //回旋，一直执行回调函数，直到节点被关闭  //std::make_shared&lt;T&gt;() 是一个模板函数，用于创建一个std::shared_ptr&lt;T&gt;对象。它不仅创建了一个共享指针，还同时创建了一个T类型的对象实例。  rclcpp::spin(std::make_shared&lt;Talker&gt;());  //释放资源  rclcpp::shutdown();  return 0;&#125;
+
+订阅方
+
+回调函数传入参数类型不能是std_msgs::msg::String的引用
+create_subscription方法传递的是消息的共享指针，而不是消息的引用。正确的参数类型应该是const std_msgs::msg::String::SharedPtr
+#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;std_msgs/msg/string.hpp&gt;class Listener : public rclcpp::Node&#123;public:    Listener() : Node(&quot;listener_node_cpp&quot;)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;订阅者已创建&quot;);        //接收到信息就执行回调函数        //create_subscription函数的作用是创建一个订阅者（subscriber），该订阅者会监听指定主题（topic）上的消息。        //当有消息发布到该主题时，create_subscription会将接收到的消息传递给指定的回调函数（callback function）。        subscription_ = this-&gt;create_subscription&lt;std_msgs::msg::String&gt;(&quot;chat&quot;,10,std::bind(&amp;Listener::do_cb,this,std::placeholders::_1));    &#125;private:    //注意传入消息类型    void do_cb(const std_msgs::msg::String::SharedPtr message)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;订阅到的消息是：%s&quot;,message-&gt;data.c_str());    &#125;        rclcpp::Subscription&lt;std_msgs::msg::String&gt;::SharedPtr subscription_;&#125;;int main(int argc, char** argv)&#123;    rclcpp::init(argc,argv);    rclcpp::spin(std::make_shared&lt;Listener&gt;());    rclcpp::shutdown();    return 0;&#125;
+
+生成代码片段
+左下角设置——代码片段——cpp
+
+自定义接口文件——编译前保存！！！！
+文件名首字母大写
+xml文件配置
+&lt;!-- 编译依赖--&gt;  &lt;build_depend&gt;&lt;/build_depend&gt;    &lt;!--执行依赖 --&gt;  &lt;exec_depend&gt;&lt;/exec_depend&gt;    &lt;!--声明当前包所属功能包组 --&gt;  &lt;member_of_group&gt;&lt;/member_of_group&gt;
+ros2 pkg list | grep -i NAME         筛选出来，不用记
+
+CMakeLists.txt
+find_package(rosidl_default_generators REQUIRED)rosidl_generate_interfaces(  $&#123;PROJECT_NAME&#125;  &quot;msg/Student.msg&quot;)
+
+使用自定义接口文件要包含路径
+#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;base_interfaces_demo/msg/student.hpp&gt;    using namespace std::chrono_literals;//1s 代表一秒 std::chrono::seconds(1)using base_interfaces_demo::msg::Student;class TalkerStu :public rclcpp::Node&#123;public:    TalkerStu() :Node(&quot;talker_stu&quot;)&#123;        publisher_ = this-&gt;create_publisher&lt;Student&gt;(&quot;Student&quot;,10);        timer_ = this-&gt;create_wall_timer(1s,std::bind(&amp;TalkerStu::callback,this));    &#125;private:    rclcpp::Publisher&lt;Student&gt;::SharedPtr publisher_;     rclcpp::TimerBase::SharedPtr timer_;    Student stu;    void callback()&#123;        stu.name  = &quot;lihua&quot;;        stu.age = 12;        stu.height = 180.0;        publisher_-&gt;publish(stu);        RCLCPP_INFO(this-&gt;get_logger(),&quot;发布消息：%s,%d,%lf&quot;,stu.name.c_str(),stu.age,stu.height);    &#125;&#125;;int main(int argc,char **argv)&#123;    rclcpp::init(argc,argv);    rclcpp::spin(std::make_shared&lt;TalkerStu&gt;());    rclcpp::shutdown();    return 0;&#125;
+#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;base_interfaces_demo/msg/student.hpp&gt;using base_interfaces_demo::msg::Student;using namespace std::chrono_literals;class ListenerStu :public rclcpp::Node&#123;public:    ListenerStu() :Node(&quot;listener_stu&quot;)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;订阅者已创建&quot;);        subscription_ = this-&gt;create_subscription&lt;Student&gt;(&quot;Student&quot;,10,std::bind(&amp;ListenerStu::callback,this,std::placeholders::_1));       &#125;private:    rclcpp::Subscription&lt;Student&gt;::SharedPtr subscription_;    void callback(const Student::SharedPtr message)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;订阅者已接收：%s,%d,%lf&quot;,message-&gt;name.c_str(),message-&gt;age,message-&gt;height);    &#125;&#125;;int main(int argc,char **argv)&#123;    rclcpp::init(argc,argv);            rclcpp::shutdown();    return 0;&#125;
+
+服务通信
+一对多，一个服务端，多个客户端
+自定义接口文件
+请求数据  ---  响应数据  
+在之前的基础上，修改CMakeLists.txt  ——rosidl_generate_interfaces即可
+服务端
+#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;base_interfaces_demo/srv/addints.hpp&gt;using base_interfaces_demo::srv::Addints;using std::placeholders::_1;using std::placeholders::_2;class AddIntServer :public rclcpp::Node&#123;public:  AddIntServer() :Node(&quot;add_int_server&quot;)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;服务端节点创建成功&quot;);      service_ = this-&gt;create_service&lt;Addints&gt;(&quot;add_ints&quot;,std::bind(&amp;AddIntServer::sum,this,_1,_2));  &#125;private:  rclcpp::Service&lt;Addints&gt;::SharedPtr service_;  void sum(const Addints::Request::SharedPtr req,const Addints::Response::SharedPtr res)&#123;    res-&gt;sum = req-&gt;num1 + req-&gt;num2;    RCLCPP_INFO(this-&gt;get_logger(),&quot;%d + %d = %d&quot;,req-&gt;num1,req-&gt;num2,res-&gt;sum);  &#125;&#125;;int main(int argc,char **argv)&#123;  rclcpp::init(argc,argv);    rclcpp::spin(std::make_shared&lt;AddIntServer&gt;());  rclcpp::shutdown();  return 0;&#125;
+测试：
+ros2 service call /add_ints base_interfaces_demo/srv/Addints “&#123;'num1':10,'num2':30&#125;&quot;
+rclcpp::ok();
+rclcpp::get_logger();     不依赖于context
+
+客户端
+main函数中需要判断提交参数是否正确
+自定义节点类中要包括 判断是否连接到服务端
+#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;base_interfaces_demo/srv/addints.hpp&gt;using base_interfaces_demo::srv::Addints;using namespace std::chrono_literals;class AddIntClient :public rclcpp::Node &#123;public:    AddIntClient() :Node(&quot;add_int_client&quot;)&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;客户端节点创建&quot;);        client_ = this-&gt;create_client&lt;Addints&gt;(&quot;add_ints&quot;);    &#125;   //连接服务器   bool connect_server()&#123;      //以1s为超时时间，连接不上，一直连接        while(!client_ -&gt; wait_for_service(1s))&#123;            //rclcpp::ok()函数来检查ROS 2节点是否仍在运行            //如果节点被请求停止（例如，通过按下Ctrl+C），rclcpp::ok()会返回false            if(!rclcpp::ok())&#123;                RCLCPP_INFO(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;强制退出&quot;);                return false;            &#125;            RCLCPP_INFO(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;服务器连接中&quot;);        &#125;        return true;          &#125;    //发送请求函数    //参数两个整形数据 返回服务器处理后的结果    rclcpp::Client&lt;Addints&gt;::SharedFuture send_request(int num1,int num2)&#123;        auto request = std::make_shared&lt;Addints::Request&gt;();        request-&gt;num1 = num1;        request-&gt;num2 = num2;       //rclcpp::Client&lt;base_interfaces_demo::srv::Addints&gt;::SharedFuture        //async_send_request(std::shared_ptr&lt;base_interfaces_demo::srv::Addints_Request&gt; request)                return client_-&gt;async_send_request(request);    &#125;private:    rclcpp::Client&lt;Addints&gt;::SharedPtr  client_;&#125;;int main(int argc,char **argv)&#123;    if(argc != 3)&#123;        RCLCPP_ERROR(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;请提交两个整型数据&quot;);        return 1;    &#125;    rclcpp::init(argc,argv);    auto client = std::make_shared&lt;AddIntClient&gt;();    bool flag = client-&gt;connect_server();    //判断是否链接上服务器    if(!flag)&#123;        RCLCPP_INFO(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;服务器连接失败&quot;);        return 0;    &#125;    //调用请求提交函数，接收并处理响应结果    auto future = client-&gt;send_request(atoi(argv[1]),atoi(argv[2]));        //处理响应    if(rclcpp::spin_until_future_complete(client,future) == rclcpp::FutureReturnCode::SUCCESS)&#123;        RCLCPP_INFO(client-&gt;get_logger(),&quot;响应成功!sum = %d&quot;,future.get()-&gt;sum);    &#125;else&#123;        RCLCPP_INFO(client-&gt;get_logger(),&quot;sd&quot;);    &#125;        rclcpp::shutdown();    return 0;&#125;
+
+动作通信
+自定义接口文件
+请求数据  ---   响应数据  ---   反馈数据  
+xml：
+&lt;!-- action补充--&gt;  &lt;buildtool_depend&gt;rosidl_default_generators&lt;/buildtool_depend&gt;  &lt;depend&gt;action_msgs&lt;/depend&gt;
+CMakeLists.txt补充rosidl_generate_interfaces
+服务端
+ros2 action send_goal /get_sum base_interfaces_demo/action/Progress -f &quot;&#123;'num':10&#125;&quot;
+rclcpp::Rate 的构造函数接受一个频率值（单位为 Hz），表示每秒执行的次数。例如：
+rclcpp::Rate rate(1.0);  // 每秒执行 1 次，即每秒运行一次循环
+rate.sleep() 方法来暂停代码的执行，直到下一次循环的时间点。如果当前循环提前完成，rate.sleep() 会阻塞当前线程，直到达到预期的频率。
+#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;rclcpp_action/rclcpp_action.hpp&gt;#include &lt;base_interfaces_demo/action/progress.hpp&gt;using base_interfaces_demo::action::Progress;using std::placeholders::_1;using std::placeholders::_2;class ActionService :public rclcpp::Node&#123;public:  ActionService() :Node(&quot;action_service&quot;)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;服务器已创建!&quot;);        //rclcpp_action::Server&lt;ActionT&gt;::SharedPtr     //create_server&lt;ActionT, NodeT&gt;    //(NodeT node,     //const std::string &amp;name,     //rclcpp_action::Server&lt;ActionT&gt;::GoalCallback handle_goal,     //rclcpp_action::Server&lt;ActionT&gt;::CancelCallback handle_cancel,     //rclcpp_action::Server&lt;ActionT&gt;::AcceptedCallback handle_accepted,    // const rcl_action_server_options_t &amp;options = rcl_action_server_get_default_options(), rclcpp::CallbackGroup::SharedPtr group = nullptr)//All provided callback functions must be non-blocking.    server_ = rclcpp_action::create_server&lt;Progress&gt;(      this,      &quot;get_sum&quot;,     std::bind(&amp;ActionService::handle_goal,this,_1,_2),     std::bind(&amp;ActionService::handle_cancel,this,_1),     std::bind(&amp;ActionService::handle_accepted,this,_1)     );  &#125;private:  rclcpp_action::Server&lt;Progress&gt;::SharedPtr server_;  //处理提交的目标值，注意参数  rclcpp_action::GoalResponse handle_goal(const rclcpp_action::GoalUUID&amp; uuid,std::shared_ptr&lt;const Progress::Goal&gt; goal)&#123;    //判断提交的数字是否大于1，大于接受，小于拒绝    if(goal-&gt;num &lt;= 1)&#123;      RCLCPP_INFO(this-&gt;get_logger(),&quot;提交数据小于1&quot;);      return rclcpp_action::GoalResponse::REJECT;    &#125;    RCLCPP_INFO(this-&gt;get_logger(),&quot;提交数据合法&quot;);    return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;  &#125;  //处理取消请求  //客户端可发送取消请求  rclcpp_action::CancelResponse handle_cancel(std::shared_ptr&lt;rclcpp_action::ServerGoalHandle&lt;Progress&gt;&gt; goal_handle)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;任务已取消&quot;);    return rclcpp_action::CancelResponse::ACCEPT;  &#125;  //生成连续反馈和最终响应  void execute(std::shared_ptr&lt;rclcpp_action::ServerGoalHandle&lt;Progress&gt;&gt; goal_handle)&#123;    //生成连续反馈给客户端 goal_handle-&gt;publish_feedback()    //void publish_feedback(std::shared_ptr&lt;base_interfaces_demo::action::Progress_Feedback&gt; feedback_msg)    //首先获取目标值，遍历然后累加，每循环一次计算进度，作为连续反馈发布    int num = goal_handle-&gt;get_goal()-&gt;num;    int sum=0;    double progress;    auto feedback = std::make_shared&lt;Progress::Feedback&gt;();    auto result = std::make_shared&lt;Progress::Result&gt;();    //设置休眠,1s一次    rclcpp::Rate rate(1.0);    for(int i = 1;i&lt;=num;i++)&#123;      sum+=i;      progress = i / (double)num;      feedback-&gt;progress = progress;      goal_handle-&gt;publish_feedback(feedback);      RCLCPP_INFO(this-&gt;get_logger(),&quot;连续反馈中，进度：%.2f&quot;,progress);      //判断是否接收到了取消请求      //true——接收到取消请求      if(goal_handle-&gt;is_canceling())&#123;              //canceled(std::shared_ptr&lt;base_interfaces_demo::action::Progress_Result&gt; result_msg)        //取消时发送最终结果        result-&gt;sum = sum;        goal_handle-&gt;canceled(result);        RCLCPP_INFO(this-&gt;get_logger(),&quot;反馈取消，结果：%d&quot;,sum);                return ;      &#125;      rate.sleep();    &#125;    //生成最终响应结果 goal_handle-&gt;succeed()    //void succeed(std::shared_ptr&lt;base_interfaces_demo::action::Progress_Result&gt; result_msg)    if(rclcpp::ok())&#123;      result-&gt;sum = sum;      goal_handle-&gt;succeed(result);      RCLCPP_INFO(this-&gt;get_logger(),&quot;最终响应结果：%d&quot;,sum);    &#125;  &#125;  void handle_accepted(std::shared_ptr&lt;rclcpp_action::ServerGoalHandle&lt;Progress&gt;&gt; goal_handle)&#123;    //新建子线程处理耗时的主逻辑实现    std::thread(std::bind(&amp;ActionService::execute,this,goal_handle)).detach();  &#125;&#125;;int main(int argc,char **argv)&#123;  rclcpp::init(argc,argv);  rclcpp::spin(std::make_shared&lt;ActionService&gt;());    rclcpp::shutdown();  return 0;&#125;
+
+客户端
+#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;rclcpp_action/rclcpp_action.hpp&gt;#include &lt;base_interfaces_demo/action/progress.hpp&gt;using base_interfaces_demo::action::Progress;using namespace std::chrono_literals;using std::placeholders::_1;using std::placeholders::_2;class ActionClient :public rclcpp::Node&#123;public:   ActionClient() :Node(&quot;action_client&quot;)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;Action 客户端已创建&quot;);    //rclcpp::CallbackGroup::SharedPtr group = nullptr)    client_ = rclcpp_action::create_client&lt;Progress&gt;(this,&quot;get_sum&quot;);   &#125;    void send(int num)&#123;        //1.连接到服务器        if(!client_-&gt;wait_for_action_server(10s))&#123;            RCLCPP_ERROR(this-&gt;get_logger(),&quot;服务器连接失败！&quot;);            return ;        &#125;        //2.发送请求               auto goal = Progress::Goal();        auto options = rclcpp_action::Client&lt;Progress&gt;::SendGoalOptions();        goal.num = num;         options.feedback_callback = std::bind(&amp;ActionClient::feedback_callback,this,_1,_2);        options.goal_response_callback = std::bind(&amp;ActionClient::goal_response_callback,this,_1);        options.result_callback = std::bind(&amp;ActionClient::result_callback,this,_1);        auto future = client_-&gt;async_send_goal(goal,options);    &#125;    void feedback_callback(rclcpp_action::ClientGoalHandle&lt;Progress&gt;::SharedPtr goal_handle,const std::shared_ptr&lt;const Progress::Feedback&gt; feedback)&#123;        double progress = feedback-&gt;progress;        RCLCPP_INFO(this-&gt;get_logger(),&quot;进度：%lf&quot;,progress);    &#125;        //处理关于目标值的服务端响应    void goal_response_callback(std::shared_future&lt;rclcpp_action::ClientGoalHandle&lt;Progress&gt;::SharedPtr&gt; goal_handle)&#123;        //响应成功返回指针,注意！！！        if(!goal_handle.get())&#123;            RCLCPP_INFO(this-&gt;get_logger(),&quot;请求被拒绝&quot;);        &#125;else&#123;            RCLCPP_INFO(this-&gt;get_logger(),&quot;请求成功&quot;);        &#125;    &#125;    void result_callback(const rclcpp_action::ClientGoalHandle&lt;Progress&gt;::WrappedResult &amp;result)&#123;        //result.code 状态码判断最终结果状态 状态玛封装在rclcpp_action::ResultCode::        if(result.code == rclcpp_action::ResultCode::SUCCEEDED)&#123;            RCLCPP_INFO(this-&gt;get_logger(),&quot;成功！，结果：%d&quot;,result.result-&gt;sum);        &#125;else&#123;            RCLCPP_ERROR(this-&gt;get_logger(),&quot;失败!&quot;);        &#125;    &#125;private:    rclcpp_action::Client&lt;Progress&gt;::SharedPtr client_;&#125;;int main(int argc,char **argv)&#123;    if(argc !=2 )&#123;        RCLCPP_ERROR(rclcpp::get_logger(&quot;rclcpp&quot;),&quot;请提交一个整型数据！&quot;);        return 1;    &#125;    rclcpp::init(argc,argv);    auto node = std::make_shared&lt;ActionClient&gt;();        node-&gt;send(atoi(argv[1]));    rclcpp::spin(node);    rclcpp::shutdown();    return 0;&#125;
+
+参数通信
+
+
+ros2 param list
+查询参数
+ros2 param get my_server wheels
+查询参数值
+服务端
+#include &lt;rclcpp/rclcpp.hpp&gt;class MyServer :public rclcpp::Node&#123;public:  //如果允许删除参数，需要通过NodeOptions配置  MyServer() :Node(&quot;my_server&quot;,rclcpp::NodeOptions().allow_undeclared_parameters(true))&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;参数服务器已建立&quot;);  &#125;  void declare()&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;------------增-----------&quot;);    this-&gt;declare_parameter(&quot;car_type&quot;,&quot;tiger&quot;);    this-&gt;declare_parameter(&quot;width&quot;,1.5);    this-&gt;declare_parameter(&quot;wheels&quot;,5);        //set也可以，但必须rclcpp::NodeOptions().allow_undeclared_parameters(true)    this-&gt;set_parameter(rclcpp::Parameter(&quot;height&quot;,1.8));  &#125;  void get()&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;------------查-----------&quot;);    //指定    auto car = this-&gt;get_parameter(&quot;car_type&quot;);    RCLCPP_INFO(this-&gt;get_logger(),&quot;key = %s , value = %s&quot;,car.get_name().c_str(),car.as_string().c_str());    //一些    auto params = this-&gt;get_parameters(&#123;&quot;car_type&quot;,&quot;width&quot;,&quot;wheels&quot;&#125;);    for(rclcpp::Parameter n : params)&#123;      RCLCPP_INFO(this-&gt;get_logger(),&quot;key = %s , value = %s&quot;,n.get_name().c_str(),n.value_to_string().c_str());         //判断是否含有      RCLCPP_INFO(this-&gt;get_logger(),&quot;是否包含%s? %d&quot;,n.get_name().c_str(),this-&gt;has_parameter(n.get_name()));    &#125;  &#125;  void update()&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;------------改-----------&quot;);    this-&gt;set_parameter(rclcpp::Parameter(&quot;width&quot;,1.4));    RCLCPP_INFO(this-&gt;get_logger(),&quot;width = %lf&quot;,this-&gt;get_parameter(&quot;width&quot;).as_double());  &#125;  void del()&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;------------删-----------&quot;);    this-&gt;undeclare_parameter(&quot;car_type&quot;);    RCLCPP_INFO(this-&gt;get_logger(),&quot;car_type还存在吗? %d&quot;,this-&gt;has_parameter(&quot;car_type&quot;));  &#125;private:&#125;;int main(int argc,char **argv)&#123;  rclcpp::init(argc,argv);    auto node = std::make_shared&lt;MyServer&gt;();  node-&gt;declare();  node-&gt;get();  node-&gt;update();  node-&gt;del();  rclcpp::spin(node);  rclcpp::shutdown();  return 0;&#125;
+
+客户端
+#include &lt;rclcpp/rclcpp.hpp&gt;#include &lt;vector&gt;using namespace std::chrono_literals;class MyClient :public rclcpp::Node&#123;public:    MyClient() :Node(&quot;my_client&quot;)&#123;    RCLCPP_INFO(this-&gt;get_logger(),&quot;参数客户端已建立&quot;);    client_ = std::make_shared&lt;rclcpp::SyncParametersClient&gt;(this,&quot;my_server&quot;);    &#125;    bool connect_server()&#123;                while(!client_-&gt;wait_for_service(1s))&#123;                        if(!rclcpp::ok())&#123;                RCLCPP_INFO(this-&gt;get_logger(),&quot;中断!&quot;);                return false;            &#125;                        RCLCPP_INFO(this-&gt;get_logger(),&quot;连接中&quot;);                &#125;        return true;    &#125;    void get()&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;获取&quot;);                //获取单个        std::string car_name =client_-&gt;get_parameter&lt;std::string&gt;(&quot;car_type&quot;);        double width = client_-&gt;get_parameter&lt;double&gt;(&quot;width&quot;);        RCLCPP_INFO(this-&gt;get_logger(),&quot;car_name:%s&quot;,car_name.c_str());        RCLCPP_INFO(this-&gt;get_logger(),&quot;width:%lf&quot;,width);        //获取多个        auto params = client_-&gt;get_parameters(&#123;&quot;car_type&quot;,&quot;width&quot;&#125;);        for(rclcpp::Parameter  n : params)&#123;            RCLCPP_INFO(this-&gt;get_logger(),&quot;key = %s , value = %s&quot;,n.get_name().c_str(),n.value_to_string().c_str());        &#125;        //判断是否含有_IN        RCLCPP_INFO(this-&gt;get_logger(),&quot;car_type? %d&quot;,client_-&gt;has_parameter(&quot;car_type&quot;));    &#125;     void update()&#123;        RCLCPP_INFO(this-&gt;get_logger(),&quot;修改&quot;);        client_-&gt;set_parameters(&#123;rclcpp::Parameter(&quot;car_type&quot;,&quot;pig&quot;),        rclcpp::Parameter(&quot;length&quot;,&quot;5.0&quot;)&#125;);//不存在也可以，但要保证服务端那个参数        RCLCPP_INFO(this-&gt;get_logger(),&quot;length? %d&quot;,client_-&gt;has_parameter(&quot;length&quot;));    &#125;private:    rclcpp::SyncParametersClient::SharedPtr client_;&#125;;int main(int argc,char **argv)&#123;    rclcpp::init(argc,argv);    auto note = std::make_shared&lt;MyClient&gt;();        bool flag = note-&gt;connect_server();    if(!flag == true)&#123;        return 0;    &#125;    note-&gt;get();    note-&gt;update();    note-&gt;get();    rclcpp::spin(note);    rclcpp::shutdown();    return 0;&#125;
+
+出现乱码：C语言字符串输出不兼容
+]]></content>
+      <tags>
+        <tag>ros2</tag>
       </tags>
   </entry>
   <entry>
